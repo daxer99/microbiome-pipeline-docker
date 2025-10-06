@@ -19,4 +19,3 @@ dependencies:
   - pip
   - pyyaml
   - pandas
-  - steramlit
