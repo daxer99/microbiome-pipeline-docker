@@ -7,7 +7,7 @@ name = "microbiome-pipeline"
 version = "0.1.0"
 description = "CLI modular para análisis de microbioma: QC, taxonomía y vías metabólicas"
 readme = "README.md"
-license = "MIT"  # ✅ Formato SPDX (PEP 639)
+license = "MIT"
 authors = [
     {name = "Rodrigo Peralta", email = "rodrigo.peralta@uner.edu.ar"}
 ]
@@ -16,7 +16,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Development Status :: 4 - Beta",
-    # ❌ Eliminado: "License :: OSI Approved :: MIT License"
 ]
 requires-python = ">=3.8"
 keywords = ["microbiome", "metagenomics", "pipeline", "cli"]

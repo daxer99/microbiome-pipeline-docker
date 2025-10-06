@@ -24,7 +24,6 @@ DEFAULT_CONFIG = {
 }
 
 def load_config(config_file="config.yaml"):
-    """Carga el archivo de configuración"""
     path = Path(config_file)
     if not path.exists():
         create_default_config(config_file)
@@ -33,24 +32,16 @@ def load_config(config_file="config.yaml"):
         return yaml.safe_load(f)
 
 def create_default_config(config_file="config.yaml"):
-    """Crea un config.yaml por defecto"""
     with open(config_file, 'w') as f:
         yaml.dump(DEFAULT_CONFIG, f, indent=2, sort_keys=False)
 
 def update_config(key, value, config_file="config.yaml"):
-    """
-    Actualiza un valor en config.yaml
-    key: puede ser 'kneaddata_db', 'metaphlan_db', etc.
-    """
     config = load_config(config_file)
-
-    # Soporte para claves anidadas como 'paths.kneaddata_db'
     keys = key.split('.')
     d = config
     for k in keys[:-1]:
         d = d[k]
     d[keys[-1]] = str(Path(value).resolve())
-
     with open(config_file, 'w') as f:
         yaml.dump(config, f, indent=2, sort_keys=False)
     print(f"✅ {key} actualizado a: {value}")

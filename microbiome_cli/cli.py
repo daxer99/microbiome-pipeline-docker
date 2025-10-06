@@ -11,13 +11,11 @@ from .pathways import run_pathways
 
 
 def run_all(samples_dir, config):
-    """Ejecuta el pipeline completo"""
     from pathlib import Path
     samples_dir = Path(samples_dir)
     if not samples_dir.exists() or not samples_dir.is_dir():
         print(f"❌ Directorio inválido: {samples_dir}")
         return
-
     samples = [d for d in samples_dir.iterdir() if d.is_dir()]
     for sample in samples:
         print(f"\n{'='*60}\n📦 PROCESANDO: {sample.name}\n{'='*60}")
@@ -37,11 +35,9 @@ def main():
     # --- Subcomando: config ---
     config_parser = subparsers.add_parser("config", help="Gestiona el archivo config.yaml")
     config_sub = config_parser.add_subparsers(dest="action")
-
     config_set = config_sub.add_parser("set", help="Establece un valor")
     config_set.add_argument("key", help="Clave (ej: kneaddata_db)")
     config_set.add_argument("value", help="Valor (ruta)")
-
     config_create = config_sub.add_parser("create", help="Crea config.yaml por defecto")
     config_create.add_argument("--file", default="config.yaml", help="Nombre del archivo")
 
@@ -57,13 +53,10 @@ def main():
     # --- Subcomandos: QC, Taxonomía, Vías ---
     qc_p = subparsers.add_parser("qc", help="Control de calidad")
     qc_p.add_argument("sample", help="Muestra")
-
     tax_p = subparsers.add_parser("taxonomy", help="Taxonomía")
     tax_p.add_argument("sample", help="Muestra")
-
     path_p = subparsers.add_parser("pathways", help="Vías metabólicas")
     path_p.add_argument("sample", help="Muestra")
-
     run_all_p = subparsers.add_parser("run-all", help="Pipeline completo")
     run_all_p.add_argument("data_dir", help="Carpeta con muestras")
 
