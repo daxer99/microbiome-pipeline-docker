@@ -1,0 +1,22 @@
+# environment.yml
+name: microbiome-pipeline
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # 🔧 Herramientas bioinformáticas
+  - python=3.10
+  - kneaddata
+  - metaphlan
+  - bowtie2
+  - samtools
+  - trimmomatic
+  - fastqc
+  - multiqc
+
+  # 📦 Pip (si necesitas más paquetes)
+  - pip
+  - pyyaml
+  - pandas
+  - steramlit
