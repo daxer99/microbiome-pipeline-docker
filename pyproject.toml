@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "microbiome-pipeline"
-version = "1.4.0"
-description = "CLI modular para análisis de microbioma: QC, taxonomía y rutas metabólicas"
+version = "0.1.0"
+description = "CLI modular para análisis de microbioma: QC, taxonomía y vías metabólicas"
 readme = "README.md"
-license = "MIT"  # ✅ Formato SPDX (PEP 639), reemplaza el antiguo {text = "..."}
+license = "MIT"  # ✅ Formato SPDX (PEP 639)
 authors = [
     {name = "Rodrigo Peralta", email = "rodrigo.peralta@uner.edu.ar"}
 ]
@@ -16,6 +16,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Development Status :: 4 - Beta",
+    # ❌ Eliminado: "License :: OSI Approved :: MIT License"
 ]
 requires-python = ">=3.8"
 keywords = ["microbiome", "metagenomics", "pipeline", "cli"]
@@ -24,10 +25,10 @@ keywords = ["microbiome", "metagenomics", "pipeline", "cli"]
 microbiome-cli = "microbiome_cli.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/daxer99/microbiome-pipeline"
-Repository = "https://github.com/daxer99/microbiome-pipeline"
-Issues = "https://github.com/daxer99/microbiome-pipeline/issues"
+Homepage = "https://github.com/daxer99/microbiome-pipeline-docker"
+Repository = "https://github.com/daxer99/microbiome-pipeline-docker"
+Issues = "https://github.com/daxer99/microbiome-pipeline-docker/issues"
 
-# ✅ Soluciona el error de "Multiple top-level packages discovered"
+# ✅ Soluciona el error de múltiples paquetes
 [tool.setuptools.packages.find]
 include = ["microbiome_cli*"]

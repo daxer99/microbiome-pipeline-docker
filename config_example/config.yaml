@@ -1,0 +1,20 @@
+###config_examples/config.yaml
+
+paths:
+  kneaddata_db: ""
+  metaphlan_db: ""
+  humann_nucleotide_db: ""
+  humann_protein_db: ""
+  humann_go_db: ""
+  humann_ko_db: ""
+  humann_ec_db: ""
+  humann_pfam_db: ""
+  humann_eggnog_db: ""
+
+tools:
+  threads: 8
+  kneaddata_env: microbiome-pipeline
+  metaphlan_env: microbiome-pipeline
+  humann3_env: microbiome-pipeline
+
+samples_dir: ""
