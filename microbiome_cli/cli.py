@@ -4,7 +4,6 @@ CLI modular para microbiome-pipeline
 """
 import argparse
 from .config_manager import load_config, create_default_config, update_config
-from .downloader import DOWNLOADERS
 from .qc import run_qc
 from .taxonomy import run_taxonomy
 from .pathways import run_pathways
@@ -41,15 +40,6 @@ def main():
     config_create = config_sub.add_parser("create", help="Crea config.yaml por defecto")
     config_create.add_argument("--file", default="config.yaml", help="Nombre del archivo")
 
-    # --- Subcomando: download ---
-    download_parser = subparsers.add_parser("download", help="Descarga bases de datos")
-    download_parser.add_argument(
-        "database",
-        choices=list(DOWNLOADERS.keys()),
-        help="Base de datos a descargar"
-    )
-    download_parser.add_argument("dir", help="Directorio donde guardar")
-
     # --- Subcomandos: QC, Taxonomía, Vías ---
     qc_p = subparsers.add_parser("qc", help="Control de calidad")
     qc_p.add_argument("sample", help="Muestra")
@@ -81,10 +71,6 @@ def main():
             update_config(args.key, args.value)
         else:
             config_parser.print_help()
-
-    elif args.command == "download":
-        downloader = DOWNLOADERS[args.database]
-        downloader(args.dir)
 
     elif args.command == "qc":
         run_qc(args.sample, config)
