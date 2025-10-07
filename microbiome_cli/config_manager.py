@@ -4,6 +4,16 @@ from pathlib import Path
 
 
 def find_repo_root():
+    """
+    Devuelve la raíz esperada dentro del contenedor Docker.
+    Fuera del contenedor, puedes modificar esta función si es necesario.
+    """
+    # Ruta fija dentro del contenedor
+    container_root = Path("/home/microbiome/microbiome-pipeline")
+    if container_root.is_dir():
+        return container_root
+
+    # Fallback: buscar pyproject.toml (para desarrollo local)
     current = Path.cwd()
     while current != current.parent:
         if (current / "pyproject.toml").exists() or (current / ".git").is_dir():
@@ -13,10 +23,6 @@ def find_repo_root():
 
 
 def load_config(config_file="config.yaml"):
-    """
-    Carga el config.yaml desde la raíz del repositorio.
-    Si no existe, lanza una excepción (que será manejada por el CLI).
-    """
     try:
         repo_root = find_repo_root()
     except FileNotFoundError as e:
@@ -27,8 +33,9 @@ def load_config(config_file="config.yaml"):
     if not config_path.exists():
         raise FileNotFoundError(
             f"❌ No se encuentra el archivo de configuración: {config_path}\n"
-            "Por favor, crea un 'config.yaml' en la raíz del repositorio.\n"
-            "Puedes usar el ejemplo del README."
+            "Por favor, asegúrate de montarlo en el contenedor.\n"
+            "Ejemplo:\n"
+            "  -v $(pwd)/config.yaml:/home/microbiome/microbiome-pipeline/config.yaml"
         )
 
     try:
