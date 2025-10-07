@@ -1,18 +1,15 @@
 # microbiome_cli/cli.py
 """
 CLI modular para microbiome-pipeline
-El config.yaml debe existir en la raíz del repositorio.
-Editado manualmente por el usuario.
 """
 import argparse
-from .config_manager import load_config
 from .qc import run_qc
 from .taxonomy import run_taxonomy
 from .pathways import run_pathways
+from .config_manager import load_config
 
 
 def run_all(samples_dir):
-    """Ejecuta todo el pipeline para todas las muestras"""
     from pathlib import Path
     samples_dir = Path(samples_dir)
     if not samples_dir.exists() or not samples_dir.is_dir():
@@ -24,15 +21,13 @@ def run_all(samples_dir):
         print(f"⚠️ No se encontraron muestras en: {samples_dir}")
         return
 
-    print(f"🚀 Iniciando pipeline para {len(samples)} muestras...")
-
-    # Cargar config UNA VEZ, antes de procesar muestras
     try:
         config = load_config()
     except Exception as e:
         print(e)
         return
 
+    print(f"🚀 Iniciando pipeline para {len(samples)} muestras...")
     for sample in samples:
         print(f"\n{'='*60}\n📦 PROCESANDO: {sample.name}\n{'='*60}")
         try:
@@ -47,31 +42,28 @@ def run_all(samples_dir):
 def main():
     parser = argparse.ArgumentParser(
         description="microbiome-pipeline CLI",
-        epilog="El config.yaml debe existir en la raíz del repositorio.",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        epilog="El config.yaml debe estar montado en /home/microbiome/microbiome-pipeline/config.yaml"
     )
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponibles")
 
-    qc_p = subparsers.add_parser("qc", help="Control de calidad con KneadData")
-    qc_p.add_argument("sample", help="Carpeta de la muestra")
+    qc_p = subparsers.add_parser("qc", help="Control de calidad")
+    qc_p.add_argument("sample", help="Muestra")
 
-    tax_p = subparsers.add_parser("taxonomy", help="Taxonomía con MetaPhlAn")
+    tax_p = subparsers.add_parser("taxonomy", help="Taxonomía")
     tax_p.add_argument("sample", help="Muestra")
 
-    path_p = subparsers.add_parser("pathways", help="Vías metabólicas con HUMAnN")
+    path_p = subparsers.add_parser("pathways", help="Vías metabólicas")
     path_p.add_argument("sample", help="Muestra")
 
-    run_all_p = subparsers.add_parser("run-all", help="Ejecutar todo el pipeline")
-    run_all_p.add_argument("data_dir", help="Carpeta con todas las muestras")
+    run_all_p = subparsers.add_parser("run-all", help="Pipeline completo")
+    run_all_p.add_argument("data_dir", help="Carpeta con muestras")
 
-    # Parsear argumentos ANTES de cargar el config
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         return
 
-    # Ejecutar comando SOLO si necesita el config
     if args.command == "run-all":
         run_all(args.data_dir)
     elif args.command == "qc":
