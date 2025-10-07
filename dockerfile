@@ -30,8 +30,8 @@ RUN pip install humann==3.9
 # Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
-# Instalar el paquete DENTRO del entorno, usando python directamente
-RUN micromamba run -n microbiome-pipeline python -m pip install -e /home/microbiome/microbiome-pipeline
+# NO instales el paquete. Asegúrate de que PYTHONPATH incluya el directorio
+ENV PYTHONPATH="/home/microbiome/microbiome-pipeline:$PYTHONPATH"
 
 # Volumen para datos
 VOLUME ["/data", "/databases"]
@@ -39,6 +39,6 @@ VOLUME ["/data", "/databases"]
 # Directorio de trabajo
 WORKDIR /home/microbiome/microbiome-pipeline
 
-# Entrypoint: evita activar el entorno
-ENTRYPOINT ["sh", "-c"]
-CMD ["exec bash"]
+# Mantén este
+ENTRYPOINT ["micromamba", "run", "-n", "microbiome-pipeline"]
+CMD ["python"]
