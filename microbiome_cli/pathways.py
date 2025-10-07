@@ -42,10 +42,10 @@ def run_pathways(sample_dir, config):
     humann_env = config['tools']['humann3_env']
 
     run_cmd(
-        f"micromamba run -n {humann_env} humann_config --update database_folders nucleotide {nucleotide_db}"
+        f"{humann_env} humann_config --update database_folders nucleotide {nucleotide_db}"
     )
     run_cmd(
-        f"micromamba run -n {humann_env} humann_config --update database_folders protein {protein_db}"
+        f"{humann_env} humann_config --update database_folders protein {protein_db}"
     )
     print(f"✅ Bases de datos configuradas:\n   Nucleótidos: {nucleotide_db}\n   Proteínas: {protein_db}")
 
@@ -53,7 +53,7 @@ def run_pathways(sample_dir, config):
     run_cmd(f"cat {r1} {r2} > {merged}")
 
     cmd = (
-        f"micromamba run -n {humann_env} humann "
+        f"{humann_env} humann "
         f"--input {merged} "
         f"--output {humann_out} "
         f"--threads {config['tools']['threads']} "
@@ -85,11 +85,11 @@ def run_pathways(sample_dir, config):
     # Renormalizar
     print("🔁 Renormalizando a abundancia relativa...")
     run_cmd(
-        f"micromamba run -n {humann_env} humann_renorm_table "
+        f"{humann_env} humann_renorm_table "
         f"--input {genefam_tsv} --units relab --output {sample_name}_merged_genefamilies_relab.tsv"
     )
     run_cmd(
-        f"micromamba run -n {humann_env} humann_renorm_table "
+        f"{humann_env} humann_renorm_table "
         f"--input {sample_name}_merged_pathabundance.tsv --units relab --output {sample_name}_merged_pathabundance_relab.tsv"
     )
 
@@ -97,7 +97,7 @@ def run_pathways(sample_dir, config):
     print("✂️ Extrayendo genefamilias no estratificadas...")
     stra_tmp_dir = "stra_tmp"
     run_cmd(
-        f"micromamba run -n {humann_env} humann_split_stratified_table "
+        f"{humann_env} humann_split_stratified_table "
         f"--input {sample_name}_merged_genefamilies_relab.tsv --output {stra_tmp_dir}"
     )
     run_cmd(f"mv {stra_tmp_dir}/{sample_name}_merged_genefamilies_relab_unstratified.tsv .")
@@ -111,11 +111,11 @@ def run_pathways(sample_dir, config):
         src = f"{stra_dir}/{out_tsv.replace('.tsv', '_unstratified.tsv')}"
 
         run_cmd(
-            f"micromamba run -n {humann_env} humann_regroup_table "
+            f"{humann_env} humann_regroup_table "
             f"-i {input_tsv} -c {db_path} -o {out_tsv}"
         )
         run_cmd(
-            f"micromamba run -n {humann_env} humann_split_stratified_table "
+            f"{humann_env} humann_split_stratified_table "
             f"--input {out_tsv} --output {stra_dir}"
         )
         if not os.path.exists(src):
