@@ -38,7 +38,7 @@ def run_taxonomy(sample_dir, config):
     temp_bz2 = os.path.join(sample_dir, f"{sample_name}_profile_mpa.bz2")
 
     cmd = (
-        f"conda run -n {config['tools']['metaphlan_env']} metaphlan "
+        f"micromamba run -n {config['tools']['metaphlan_env']} metaphlan "
         f"{r1},{r2} "
         f"--input_type fastq "
         f"--db_dir {config['paths']['metaphlan_db']} "
