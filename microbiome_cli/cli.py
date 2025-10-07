@@ -1,21 +1,30 @@
 # microbiome_cli/cli.py
 """
 CLI modular para microbiome-pipeline
+El config.yaml se carga automáticamente desde la raíz del repositorio.
+Editado manualmente por el usuario.
 """
 import argparse
-from .config_manager import load_config, create_default_config, update_config
+from .config_manager import load_config
 from .qc import run_qc
 from .taxonomy import run_taxonomy
 from .pathways import run_pathways
 
 
 def run_all(samples_dir, config):
+    """Ejecuta todo el pipeline para todas las muestras"""
     from pathlib import Path
     samples_dir = Path(samples_dir)
     if not samples_dir.exists() or not samples_dir.is_dir():
         print(f"❌ Directorio inválido: {samples_dir}")
         return
+
     samples = [d for d in samples_dir.iterdir() if d.is_dir()]
+    if not samples:
+        print(f"⚠️ No se encontraron muestras en: {samples_dir}")
+        return
+
+    print(f"🚀 Iniciando pipeline para {len(samples)} muestras...")
     for sample in samples:
         print(f"\n{'='*60}\n📦 PROCESANDO: {sample.name}\n{'='*60}")
         try:
@@ -24,31 +33,33 @@ def run_all(samples_dir, config):
             run_pathways(str(sample), config)
             print(f"✅ COMPLETADO: {sample.name}")
         except Exception as e:
-            print(f"❌ ERROR: {e}")
+            print(f"❌ ERROR en {sample.name}: {e}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="microbiome-pipeline CLI")
-    subparsers = parser.add_subparsers(dest="command", help="Subcomandos disponibles")
+    parser = argparse.ArgumentParser(
+        description="microbiome-pipeline CLI\nEl config.yaml se carga desde la raíz del repositorio."
+    )
+    subparsers = parser.add_subparsers(dest="command", help="Comandos disponibles")
 
-    # --- Subcomando: config ---
-    config_parser = subparsers.add_parser("config", help="Gestiona el archivo config.yaml")
-    config_sub = config_parser.add_subparsers(dest="action")
-    config_set = config_sub.add_parser("set", help="Establece un valor")
-    config_set.add_argument("key", help="Clave (ej: kneaddata_db)")
-    config_set.add_argument("value", help="Valor (ruta)")
-    config_create = config_sub.add_parser("create", help="Crea config.yaml por defecto")
-    config_create.add_argument("--file", default="config.yaml", help="Nombre del archivo")
+    # --- Subcomando: crear config ---
+    config_parser = subparsers.add_parser(
+        "config",
+        help="Crea un config.yaml por defecto en la raíz del repositorio"
+    )
 
-    # --- Subcomandos: QC, Taxonomía, Vías ---
-    qc_p = subparsers.add_parser("qc", help="Control de calidad")
-    qc_p.add_argument("sample", help="Muestra")
-    tax_p = subparsers.add_parser("taxonomy", help="Taxonomía")
-    tax_p.add_argument("sample", help="Muestra")
-    path_p = subparsers.add_parser("pathways", help="Vías metabólicas")
-    path_p.add_argument("sample", help="Muestra")
-    run_all_p = subparsers.add_parser("run-all", help="Pipeline completo")
-    run_all_p.add_argument("data_dir", help="Carpeta con muestras")
+    # --- Comandos del pipeline ---
+    qc_p = subparsers.add_parser("qc", help="Control de calidad con KneadData")
+    qc_p.add_argument("sample", help="Carpeta de la muestra")
+
+    tax_p = subparsers.add_parser("taxonomy", help="Taxonomía con MetaPhlAn")
+    tax_p.add_argument("sample", help="Carpeta de la muestra")
+
+    path_p = subparsers.add_parser("pathways", help="Vías metabólicas con HUMAnN")
+    path_p.add_argument("sample", help="Carpeta de la muestra")
+
+    run_all_p = subparsers.add_parser("run-all", help="Ejecutar todo el pipeline")
+    run_all_p.add_argument("data_dir", help="Carpeta con todas las muestras")
 
     # Parsear argumentos
     args = parser.parse_args()
@@ -57,32 +68,33 @@ def main():
         parser.print_help()
         return
 
-    # Cargar config si es necesario
-    config = None
-    if args.command in ["qc", "taxonomy", "pathways", "run-all"]:
-        config = load_config()
-
     # Ejecutar comando
     if args.command == "config":
-        if args.action == "create":
-            create_default_config(args.file)
-            print(f"✅ config.yaml creado: {args.file}")
-        elif args.action == "set":
-            update_config(args.key, args.value)
-        else:
-            config_parser.print_help()
+        from .config_manager import find_repo_root, create_default_config
+        try:
+            repo_root = find_repo_root()
+            config_path = repo_root / "config.yaml"
+            if config_path.exists():
+                print(f"⚠️  {config_path} ya existe. Elimínalo primero si quieres recrearlo.")
+            else:
+                create_default_config(config_path)
+                print(f"✅ Archivo creado: {config_path}")
+                print("📌 Edítalo con tu editor de texto antes de usar el pipeline.")
+        except FileNotFoundError as e:
+            print(f"❌ Error: {e}")
 
-    elif args.command == "qc":
-        run_qc(args.sample, config)
+    else:
+        # Todos los demás comandos necesitan el config
+        config = load_config("config.yaml")
 
-    elif args.command == "taxonomy":
-        run_taxonomy(args.sample, config)
-
-    elif args.command == "pathways":
-        run_pathways(args.sample, config)
-
-    elif args.command == "run-all":
-        run_all(args.data_dir, config)
+        if args.command == "qc":
+            run_qc(args.sample, config)
+        elif args.command == "taxonomy":
+            run_taxonomy(args.sample, config)
+        elif args.command == "pathways":
+            run_pathways(args.sample, config)
+        elif args.command == "run-all":
+            run_all(args.data_dir, config)
 
 
 if __name__ == "__main__":
