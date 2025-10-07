@@ -30,8 +30,8 @@ RUN pip install humann==3.9
 # Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
-# Instalar paquete en modo desarrollo
-RUN pip install -e /home/microbiome/microbiome-pipeline
+# Instalar el paquete DENTRO del entorno conda
+RUN micromamba run -n microbiome-pipeline pip install -e /home/microbiome/microbiome-pipeline
 
 # Volumen para datos
 VOLUME ["/data", "/databases"]
