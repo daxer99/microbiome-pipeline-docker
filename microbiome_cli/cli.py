@@ -25,10 +25,17 @@ def run_all(samples_dir):
         return
 
     print(f"🚀 Iniciando pipeline para {len(samples)} muestras...")
+
+    # Cargar config UNA VEZ, antes de procesar muestras
+    try:
+        config = load_config()
+    except Exception as e:
+        print(e)
+        return
+
     for sample in samples:
         print(f"\n{'='*60}\n📦 PROCESANDO: {sample.name}\n{'='*60}")
         try:
-            config = load_config()  # Carga aquí, no antes
             run_qc(str(sample), config)
             run_taxonomy(str(sample), config)
             run_pathways(str(sample), config)
@@ -39,7 +46,9 @@ def run_all(samples_dir):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="microbiome-pipeline CLI\nEl config.yaml debe existir en la raíz del repositorio."
+        description="microbiome-pipeline CLI",
+        epilog="El config.yaml debe existir en la raíz del repositorio.",
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponibles")
 
@@ -47,34 +56,42 @@ def main():
     qc_p.add_argument("sample", help="Carpeta de la muestra")
 
     tax_p = subparsers.add_parser("taxonomy", help="Taxonomía con MetaPhlAn")
-    tax_p.add_argument("sample", help="Carpeta de la muestra")
+    tax_p.add_argument("sample", help="Muestra")
 
     path_p = subparsers.add_parser("pathways", help="Vías metabólicas con HUMAnN")
-    path_p.add_argument("sample", help="Carpeta de la muestra")
+    path_p.add_argument("sample", help="Muestra")
 
     run_all_p = subparsers.add_parser("run-all", help="Ejecutar todo el pipeline")
     run_all_p.add_argument("data_dir", help="Carpeta con todas las muestras")
 
-    # Parsear argumentos ANTES de cargar config
+    # Parsear argumentos ANTES de cargar el config
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         return
 
-    # Ahora sí, carga el config solo si el comando lo necesita
-    if args.command in ["qc", "taxonomy", "pathways", "run-all"]:
-        config = load_config()
-
-    # Ejecutar comando
-    if args.command == "qc":
-        run_qc(args.sample, config)
+    # Ejecutar comando SOLO si necesita el config
+    if args.command == "run-all":
+        run_all(args.data_dir)
+    elif args.command == "qc":
+        try:
+            config = load_config()
+            run_qc(args.sample, config)
+        except Exception as e:
+            print(e)
     elif args.command == "taxonomy":
-        run_taxonomy(args.sample, config)
+        try:
+            config = load_config()
+            run_taxonomy(args.sample, config)
+        except Exception as e:
+            print(e)
     elif args.command == "pathways":
-        run_pathways(args.sample, config)
-    elif args.command == "run-all":
-        run_all(args.data_dir)  # run_all carga el config por cada muestra si es necesario
+        try:
+            config = load_config()
+            run_pathways(args.sample, config)
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":
