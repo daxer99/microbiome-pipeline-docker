@@ -1,0 +1,35 @@
+# config.yaml
+# Archivo de configuración principal del microbiome-pipeline
+# Rutas absolutas desde el host. Se montan en el contenedor con docker run -v
+
+paths:
+  # KneadData: genoma humano hg37 (usado para QC)
+  kneaddata_db: "/databases/kneaddata/hg37"
+
+  # MetaPhlAn: base taxonómica
+  metaphlan_db: "/databases/metaphlan/mpa_vJun23_CHOCOPhlAnSGB_202307"
+
+  # HUMAnN - ChocoPhlAn (genomas completos)
+  humann_nucleotide_db: "/databases/chocophlan"
+
+  # HUMAnN - UniRef90 (proteínas)
+  humann_protein_db: "/databases/uniref"
+
+  # HUMAnN - Utility Mapping (archivos de mapeo KO, GO, EC, etc.)
+  humann_go_db: "/databases/utility_mapping/map_go_uniref90.txt.gz"
+  humann_ko_db: "/databases/utility_mapping/map_ko_uniref90.txt.gz"
+  humann_ec_db: "/databases/utility_mapping/map_level4ec_uniref90.txt.gz"
+  humann_pfam_db: "/databases/utility_mapping/map_pfam_uniref90.txt.gz"
+  humann_eggnog_db: "/databases/utility_mapping/map_eggnog_uniref90.txt.gz"
+
+tools:
+  # Número de hilos para los análisis
+  threads: 8
+
+  # Nombre del entorno conda (debe coincidir con el del contenedor)
+  kneaddata_env: microbiome-pipeline
+  metaphlan_env: microbiome-pipeline
+  humann3_env: microbiome-pipeline
+
+# Carpeta base de muestras (solo para referencia o GUI futura)
+samples_dir: "/data"
