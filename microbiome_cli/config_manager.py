@@ -2,17 +2,8 @@
 import yaml
 from pathlib import Path
 
-
 def find_repo_root():
-    """
-    Busca la raíz del repositorio (donde está pyproject.toml o .git).
-    """
-    current = Path.cwd()
-    while current != current.parent:
-        if (current / "pyproject.toml").exists() or (current / ".git").is_dir():
-            return current
-        current = current.parent
-    raise FileNotFoundError("No se encontró la raíz del repositorio")
+    return Path("/home/microbiome/microbiome-pipeline")
 
 
 def load_config(config_file="config.yaml"):
