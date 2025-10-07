@@ -1,8 +1,8 @@
 # microbiome_cli/cli.py
 """
 CLI modular para microbiome-pipeline
-El config.yaml se carga automáticamente desde la raíz del repositorio.
-Editado manualmente por el usuario.
+El config.yaml debe existir en la raíz del repositorio.
+No se crea ni modifica desde la CLI.
 """
 import argparse
 from .config_manager import load_config
@@ -38,15 +38,9 @@ def run_all(samples_dir, config):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="microbiome-pipeline CLI\nEl config.yaml se carga desde la raíz del repositorio."
+        description="microbiome-pipeline CLI\nEl config.yaml debe existir en la raíz del repositorio."
     )
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponibles")
-
-    # --- Subcomando: crear config ---
-    config_parser = subparsers.add_parser(
-        "config",
-        help="Crea un config.yaml por defecto en la raíz del repositorio"
-    )
 
     # --- Comandos del pipeline ---
     qc_p = subparsers.add_parser("qc", help="Control de calidad con KneadData")
@@ -68,33 +62,18 @@ def main():
         parser.print_help()
         return
 
+    # Todos los comandos necesitan el config
+    config = load_config("config.yaml")
+
     # Ejecutar comando
-    if args.command == "config":
-        from .config_manager import find_repo_root, create_default_config
-        try:
-            repo_root = find_repo_root()
-            config_path = repo_root / "config.yaml"
-            if config_path.exists():
-                print(f"⚠️  {config_path} ya existe. Elimínalo primero si quieres recrearlo.")
-            else:
-                create_default_config(config_path)
-                print(f"✅ Archivo creado: {config_path}")
-                print("📌 Edítalo con tu editor de texto antes de usar el pipeline.")
-        except FileNotFoundError as e:
-            print(f"❌ Error: {e}")
-
-    else:
-        # Todos los demás comandos necesitan el config
-        config = load_config("config.yaml")
-
-        if args.command == "qc":
-            run_qc(args.sample, config)
-        elif args.command == "taxonomy":
-            run_taxonomy(args.sample, config)
-        elif args.command == "pathways":
-            run_pathways(args.sample, config)
-        elif args.command == "run-all":
-            run_all(args.data_dir, config)
+    if args.command == "qc":
+        run_qc(args.sample, config)
+    elif args.command == "taxonomy":
+        run_taxonomy(args.sample, config)
+    elif args.command == "pathways":
+        run_pathways(args.sample, config)
+    elif args.command == "run-all":
+        run_all(args.data_dir, config)
 
 
 if __name__ == "__main__":
