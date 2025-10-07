@@ -2,7 +2,7 @@
 """
 CLI modular para microbiome-pipeline
 El config.yaml debe existir en la raíz del repositorio.
-No se crea ni modifica desde la CLI.
+Editado manualmente por el usuario.
 """
 import argparse
 from .config_manager import load_config
@@ -11,7 +11,7 @@ from .taxonomy import run_taxonomy
 from .pathways import run_pathways
 
 
-def run_all(samples_dir, config):
+def run_all(samples_dir):
     """Ejecuta todo el pipeline para todas las muestras"""
     from pathlib import Path
     samples_dir = Path(samples_dir)
@@ -28,6 +28,7 @@ def run_all(samples_dir, config):
     for sample in samples:
         print(f"\n{'='*60}\n📦 PROCESANDO: {sample.name}\n{'='*60}")
         try:
+            config = load_config()  # Carga aquí, no antes
             run_qc(str(sample), config)
             run_taxonomy(str(sample), config)
             run_pathways(str(sample), config)
@@ -42,7 +43,6 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponibles")
 
-    # --- Comandos del pipeline ---
     qc_p = subparsers.add_parser("qc", help="Control de calidad con KneadData")
     qc_p.add_argument("sample", help="Carpeta de la muestra")
 
@@ -55,15 +55,16 @@ def main():
     run_all_p = subparsers.add_parser("run-all", help="Ejecutar todo el pipeline")
     run_all_p.add_argument("data_dir", help="Carpeta con todas las muestras")
 
-    # Parsear argumentos
+    # Parsear argumentos ANTES de cargar config
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         return
 
-    # Todos los comandos necesitan el config
-    config = load_config("config.yaml")
+    # Ahora sí, carga el config solo si el comando lo necesita
+    if args.command in ["qc", "taxonomy", "pathways", "run-all"]:
+        config = load_config()
 
     # Ejecutar comando
     if args.command == "qc":
@@ -73,7 +74,7 @@ def main():
     elif args.command == "pathways":
         run_pathways(args.sample, config)
     elif args.command == "run-all":
-        run_all(args.data_dir, config)
+        run_all(args.data_dir)  # run_all carga el config por cada muestra si es necesario
 
 
 if __name__ == "__main__":
