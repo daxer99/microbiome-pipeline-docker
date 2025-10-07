@@ -39,6 +39,7 @@ VOLUME ["/data", "/databases"]
 # Directorio de trabajo
 WORKDIR /home/microbiome/microbiome-pipeline
 
-# Mantén este
-ENTRYPOINT ["micromamba", "run", "-n", "microbiome-pipeline"]
+# Elimina el ENTRYPOINT que fuerza micromamba run
+# Así puedes controlar manualmente cuándo usar micromamba
+ENTRYPOINT []
 CMD ["python"]

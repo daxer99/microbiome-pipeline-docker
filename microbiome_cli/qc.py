@@ -18,7 +18,7 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
 
     cmd = (
-        f"{config['tools']['kneaddata_env']} kneaddata "
+        f"micromamba run -n {config['tools']['kneaddata_env']} kneaddata "
         f"--input1 {r1} --input2 {r2} "
         f"-db {config['paths']['kneaddata_db']} "
         f"-t {config['tools']['threads']} "
