@@ -28,6 +28,5 @@ Homepage = "https://github.com/daxer99/microbiome-pipeline-docker"
 Repository = "https://github.com/daxer99/microbiome-pipeline-docker"
 Issues = "https://github.com/daxer99/microbiome-pipeline-docker/issues"
 
-# ✅ Soluciona el error de múltiples paquetes
 [tool.setuptools.packages.find]
 include = ["microbiome_cli*"]

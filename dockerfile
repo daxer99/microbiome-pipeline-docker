@@ -1,45 +1,76 @@
 # Dockerfile
-FROM mambaorg/micromamba:1.5
+FROM ubuntu:22.04
 
 LABEL maintainer="rodrigo.peralta@uner.edu.ar"
+LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pipeline-docker"
+
+# Evitar preguntas durante instalación
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Etc/UTC
+
+# Actualizar sistema y herramientas básicas
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        wget \
+        bzip2 \
+        ca-certificates \
+        curl \
+        unzip \
+        git \
+        build-essential \
+        libgl1 \
+        libglib2.0-0 \
+        pigz \
+        locales && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configurar UTF-8
+RUN locale-gen en_US.UTF-8
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 
 # Crear usuario no-root
-USER root
 RUN useradd -m -s /bin/bash microbiome && \
     mkdir -p /home/microbiome/work && \
     chown -R microbiome:microbiome /home/microbiome
 
-# Cambiar a usuario no-root
-USER microbiome
 WORKDIR /home/microbiome
 
-# Copiar environment.yml
-COPY --chown=microbiome:microbiome environment.yml /tmp/environment.yml
+# Instalar Python 3.10 y pip
+RUN apt-get update && \
+    apt-get install -y python3.10 python3.10-venv python3.10-dev && \
+    ln -sf python3.10 /usr/bin/python && \
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python
 
-# Crear entorno sin inicializar micromamba en el shell
-RUN micromamba create -n microbiome-pipeline -f /tmp/environment.yml && \
-    echo "Micromamba installed, but NOT auto-activated." > ~/.bashrc
+# Crear entorno virtual
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Establecer PATH directamente (clave)
-ENV MAMBA_ROOT_PREFIX=/opt/conda
-ENV PATH=/opt/conda/envs/microbiome-pipeline/bin:$PATH
+# Instalar herramientas bioinformáticas desde pip
+RUN pip install \
+    kneaddata==0.12.3 \
+    metaphlan==4.2.2 \
+    humann==3.9 \
+    biopython \
+    pandas \
+    pyyaml
 
-# Instalar humann desde pip
-RUN pip install humann==3.9
-
-# Copiar código del proyecto
+# Preparar directorio del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
-# NO instales el paquete. Asegúrate de que PYTHONPATH incluya el directorio
+# Activar entorno virtual por defecto
 ENV PYTHONPATH="/home/microbiome/microbiome-pipeline:$PYTHONPATH"
+
+# Instalar el paquete en modo desarrollo
+USER microbiome
+WORKDIR /home/microbiome/microbiome-pipeline
+RUN pip install -e .
 
 # Volumen para datos
 VOLUME ["/data", "/databases"]
 
-# Directorio de trabajo
-WORKDIR /home/microbiome/microbiome-pipeline
-
-# Elimina el ENTRYPOINT que fuerza micromamba run
-# Así puedes controlar manualmente cuándo usar micromamba
+# Entrypoint y comando
 ENTRYPOINT []
 CMD ["python"]

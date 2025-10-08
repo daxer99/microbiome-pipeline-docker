@@ -1,29 +1,31 @@
-from .utils import run_cmd
+# microbiome_cli/qc.py
+import subprocess
 import os
 
 def run_qc(sample_dir, config):
-    print(f"🔍 QC: Procesando {sample_dir}")
+    db = config["paths"]["kneaddata_db"]
+    threads = config["tools"]["threads"]
 
-    fastq_files = [
-        f for f in os.listdir(sample_dir)
-        if f.endswith((".fastq", ".fq", ".fastq.gz", ".fq.gz"))
-    ]
-    fastq_files.sort()
+    # Asegurarse de que las rutas de entrada existen
+    input1 = os.path.join(sample_dir, "R1.fastq")
+    input2 = os.path.join(sample_dir, "R2.fastq")
 
-    if len(fastq_files) < 2:
-        raise ValueError(f"No se encontraron suficientes archivos FASTQ en {sample_dir}")
+    if not os.path.exists(input1) or not os.path.exists(input2):
+        raise FileNotFoundError(f"No se encontraron los archivos FASTQ en {sample_dir}")
 
-    r1 = os.path.join(sample_dir, fastq_files[0])
-    r2 = os.path.join(sample_dir, fastq_files[1])
     output_dir = os.path.join(sample_dir, "kneaddata_output")
+    os.makedirs(output_dir, exist_ok=True)
 
     cmd = (
-        f"micromamba run -n {config['tools']['kneaddata_env']} kneaddata "
-        f"--input1 {r1} --input2 {r2} "
-        f"-db {config['paths']['kneaddata_db']} "
-        f"-t {config['tools']['threads']} "
+        f"kneaddata "
+        f"--input1 {input1} --input2 {input2} "
+        f"-db {db} "
+        f"-t {threads} "
         f"-o {output_dir} "
         f"--run-fastqc-start --run-fastqc-end"
     )
-    run_cmd(cmd)
-    print(f"✅ QC completado: {output_dir}")
+
+    print(f"🔍 QC: {cmd}")
+    result = subprocess.run(cmd, shell=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"Command failed: {cmd}")

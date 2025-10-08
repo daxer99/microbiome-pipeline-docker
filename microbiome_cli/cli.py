@@ -1,15 +1,18 @@
 # microbiome_cli/cli.py
 """
 CLI modular para microbiome-pipeline
+Ejecutable en Docker sin conda/micromamba.
 """
 import argparse
 from .qc import run_qc
 from .taxonomy import run_taxonomy
 from .pathways import run_pathways
 from .config_manager import load_config
+from .downloader import DOWNLOADERS
 
 
 def run_all(samples_dir):
+    """Ejecuta todo el pipeline para todas las muestras."""
     from pathlib import Path
     samples_dir = Path(samples_dir)
     if not samples_dir.exists() or not samples_dir.is_dir():
@@ -46,38 +49,57 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponibles")
 
-    qc_p = subparsers.add_parser("qc", help="Control de calidad")
-    qc_p.add_argument("sample", help="Muestra")
+    # --- Subcomando: download ---
+    download_parser = subparsers.add_parser("download", help="Descargar bases de datos")
+    download_parser.add_argument(
+        "database",
+        choices=list(DOWNLOADERS.keys()),
+        help="Base de datos a descargar (kneaddata, metaphlan, chocophlan, uniref, utility-mapping)"
+    )
+    download_parser.add_argument("dir", help="Directorio donde guardar la base de datos")
 
-    tax_p = subparsers.add_parser("taxonomy", help="Taxonomía")
+    # --- Subcomandos del pipeline ---
+    qc_p = subparsers.add_parser("qc", help="Control de calidad con KneadData")
+    qc_p.add_argument("sample", help="Carpeta de la muestra")
+
+    tax_p = subparsers.add_parser("taxonomy", help="Taxonomía con MetaPhlAn")
     tax_p.add_argument("sample", help="Muestra")
 
-    path_p = subparsers.add_parser("pathways", help="Vías metabólicas")
+    path_p = subparsers.add_parser("pathways", help="Vías metabólicas con HUMAnN")
     path_p.add_argument("sample", help="Muestra")
 
-    run_all_p = subparsers.add_parser("run-all", help="Pipeline completo")
-    run_all_p.add_argument("data_dir", help="Carpeta con muestras")
+    run_all_p = subparsers.add_parser("run-all", help="Ejecutar todo el pipeline")
+    run_all_p.add_argument("data_dir", help="Carpeta con todas las muestras")
 
+    # Parsear argumentos
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         return
 
-    if args.command == "run-all":
+    # Ejecutar comando
+    if args.command == "download":
+        downloader = DOWNLOADERS[args.database]
+        downloader(args.dir)
+
+    elif args.command == "run-all":
         run_all(args.data_dir)
+
     elif args.command == "qc":
         try:
             config = load_config()
             run_qc(args.sample, config)
         except Exception as e:
             print(e)
+
     elif args.command == "taxonomy":
         try:
             config = load_config()
             run_taxonomy(args.sample, config)
         except Exception as e:
             print(e)
+
     elif args.command == "pathways":
         try:
             config = load_config()
