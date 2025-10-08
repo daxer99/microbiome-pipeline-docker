@@ -1,14 +1,13 @@
 # microbiome_cli/qc.py
 import subprocess
 import os
-import kneaddata
 
 
 def run_qc(sample_dir, config):
     db = config["paths"]["kneaddata_db"]
     threads = config["tools"]["threads"]
 
-    # Entradas
+    # Asegurarse de que las rutas de entrada existen
     input1 = os.path.join(sample_dir, "R1.fastq")
     input2 = os.path.join(sample_dir, "R2.fastq")
 
@@ -18,14 +17,10 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # Obtener la ruta al trimmomatic.jar incluido en kneaddata
-    try:
-        KNEDDATA_PATH = os.path.dirname(kneaddata.__file__)
-        TRIMMOMATIC_JAR_DIR = os.path.join(KNEDDATA_PATH, "trimmomatic")
-        if not os.path.exists(TRIMMOMATIC_JAR_DIR):
-            raise FileNotFoundError(f"No se encuentra el directorio de Trimmomatic: {TRIMMOMATIC_JAR_DIR}")
-    except Exception as e:
-        raise RuntimeError(f"Error al encontrar Trimmomatic: {e}")
+    # Ruta fija a trimmomatic.jar
+    TRIMMOMATIC_JAR = "/opt/trimmomatic/trimmomatic.jar"
+    if not os.path.exists(TRIMMOMATIC_JAR):
+        raise FileNotFoundError(f"No se encuentra trimmomatic.jar: {TRIMMOMATIC_JAR}")
 
     cmd = (
         f"kneaddata "
@@ -33,7 +28,7 @@ def run_qc(sample_dir, config):
         f"-db {db} "
         f"-t {threads} "
         f"-o {output_dir} "
-        f"--trimmomatic {TRIMMOMATIC_JAR_DIR} "
+        f"--trimmomatic {TRIMMOMATIC_JAR} "
         f"--run-fastqc-start --run-fastqc-end"
     )
 
