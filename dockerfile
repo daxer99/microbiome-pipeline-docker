@@ -5,15 +5,10 @@ LABEL maintainer="rodrigo.peralta@uner.edu.ar"
 LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pipeline-docker"
 
 # Evitar preguntas durante instalación
-ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Etc/UTC
 
-# Configurar UTF-8
-RUN locale-gen en_US.UTF-8
-ENV LANG=en_US.UTF-8 \
-    LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8
-
-# Instalar herramientas básicas
+# Instalar herramientas básicas (incluido locales para locale-gen)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         wget \
@@ -22,6 +17,12 @@ RUN apt-get update && \
         curl \
         locales && \
     rm -rf /var/lib/apt/lists/*
+
+# Configurar UTF-8
+RUN locale-gen en_US.UTF-8
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 
 # Crear usuario no-root
 RUN useradd -m -s /bin/bash microbiome && \
