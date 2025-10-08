@@ -22,7 +22,6 @@ RUN apt-get update && \
         libglib2.0-0 \
         pigz \
         locales && \
-    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Configurar UTF-8
@@ -46,6 +45,8 @@ RUN apt-get update && \
 
 # Crear entorno virtual
 RUN python -m venv /opt/venv
+# Dar permisos al usuario microbiome sobre el entorno virtual
+RUN chown -R microbiome:microbiome /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Instalar herramientas bioinformáticas desde pip
@@ -57,15 +58,17 @@ RUN pip install \
     pandas \
     pyyaml
 
-# Preparar directorio del proyecto
+# Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
 # Activar entorno virtual por defecto
 ENV PYTHONPATH="/home/microbiome/microbiome-pipeline:$PYTHONPATH"
 
-# Instalar el paquete en modo desarrollo
+# Cambiar a usuario no-root
 USER microbiome
 WORKDIR /home/microbiome/microbiome-pipeline
+
+# Instalar el paquete en modo desarrollo
 RUN pip install -e .
 
 # Volumen para datos
