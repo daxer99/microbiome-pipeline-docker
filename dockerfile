@@ -5,22 +5,14 @@ LABEL maintainer="rodrigo.peralta@uner.edu.ar"
 LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pipeline-docker"
 
 # Evitar preguntas durante instalación
-ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Etc/UTC
+ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
 
-# Actualizar sistema y herramientas básicas
+# Instalar herramientas básicas
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        wget \
-        bzip2 \
+        openjdk-17-jre \
         ca-certificates \
         curl \
-        unzip \
-        git \
-        build-essential \
-        libgl1 \
-        libglib2.0-0 \
-        pigz \
         locales && \
     rm -rf /var/lib/apt/lists/*
 
@@ -37,7 +29,7 @@ RUN useradd -m -s /bin/bash microbiome && \
 
 WORKDIR /home/microbiome
 
-# Instalar Python 3.10 y pip
+# Instalar Python 3.10
 RUN apt-get update && \
     apt-get install -y python3.10 python3.10-venv python3.10-dev && \
     ln -sf python3.10 /usr/bin/python && \
@@ -45,7 +37,6 @@ RUN apt-get update && \
 
 # Crear entorno virtual
 RUN python -m venv /opt/venv
-# Dar permisos al usuario microbiome sobre el entorno virtual
 RUN chown -R microbiome:microbiome /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
