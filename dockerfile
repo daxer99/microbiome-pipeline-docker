@@ -53,10 +53,13 @@ RUN pip install \
 
 # --- INSTALAR TRIMMOMATIC MANUALMENTE ---
 ENV TRIMMOMATIC_DIR=/opt/trimmomatic
-RUN mkdir -p $TRIMMOMATIC_DIR && \
-    wget -O $TRIMMOMATIC_DIR/trimmomatic.jar \
-    "https://repo1.maven.org/maven2/io/github/tlim/trimmomatic/0.40/trimmomatic-0.40.jar" && \
-    echo "✅ Trimmomatic descargado"
+RUN mkdir -p /tmp/trimmomatic-download && \
+    cd /tmp/trimmomatic-download && \
+    wget -O Trimmomatic-0.40.zip https://github.com/timflutre/trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip && \
+    unzip Trimmomatic-0.40.zip && \
+    cp -r Trimmomatic-0.40/* $TRIMMOMATIC_DIR/ && \
+    rm -rf /tmp/trimmomatic-download && \
+    echo "✅ Trimmomatic instalado en $TRIMMOMATIC_DIR"
 
 # Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
