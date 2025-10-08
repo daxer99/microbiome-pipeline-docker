@@ -49,6 +49,16 @@ RUN pip install \
     pandas \
     pyyaml
 
+# --- INSTALAR TRIMMOMATIC MANUALMENTE ---
+ENV TRIMMOMATIC_DIR=/opt/trimmomatic
+RUN mkdir -p $TRIMMOMATIC_DIR && \
+    wget -O $TRIMMOMATIC_DIR/trimmomatic.jar \
+    "https://repo1.maven.org/maven2/io/github/tlim/trimmomatic/0.40/trimmomatic-0.40.jar" && \
+    echo "✅ Trimmomatic descargado"
+
+# Hacer Java disponible
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
 # Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
