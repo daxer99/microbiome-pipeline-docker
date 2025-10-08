@@ -5,13 +5,11 @@ LABEL maintainer="rodrigo.peralta@uner.edu.ar"
 LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pipeline-docker"
 
 # Evitar preguntas durante instalación
-ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Etc/UTC
+ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
 
 # Instalar herramientas básicas
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        wget \                    # ← ¡Faltaba esto!
         openjdk-17-jre \
         ca-certificates \
         curl \
@@ -50,13 +48,6 @@ RUN pip install \
     biopython \
     pandas \
     pyyaml
-
-# --- INSTALAR TRIMMOMATIC MANUALMENTE ---
-ENV TRIMMOMATIC_DIR=/opt/trimmomatic
-RUN mkdir -p $TRIMMOMATIC_DIR && \
-    wget -O $TRIMMOMATIC_DIR/trimmomatic.jar \
-    "https://repo1.maven.org/maven2/io/github/tlim/trimmomatic/0.40/trimmomatic-0.40.jar" && \
-    echo "✅ Trimmomatic descargado"
 
 # Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
