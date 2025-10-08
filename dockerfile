@@ -5,24 +5,23 @@ LABEL maintainer="rodrigo.peralta@uner.edu.ar"
 LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pipeline-docker"
 
 # Evitar preguntas durante instalación
-ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Etc/UTC
-
-# Instalar herramientas básicas
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        wget \                    # ← ¡Faltaba esto!
-        openjdk-17-jre \
-        ca-certificates \
-        curl \
-        locales && \
-    rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
 
 # Configurar UTF-8
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8
+
+# Instalar herramientas básicas
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        wget \
+        openjdk-17-jre \
+        ca-certificates \
+        curl \
+        locales && \
+    rm -rf /var/lib/apt/lists/*
 
 # Crear usuario no-root
 RUN useradd -m -s /bin/bash microbiome && \
