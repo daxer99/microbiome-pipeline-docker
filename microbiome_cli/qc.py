@@ -23,7 +23,7 @@ def run_qc(sample_dir, config):
 
     cmd = (
         f"kneaddata "
-        f"--input {input1} --input {input2} "
+        f"--input1 {input1} --input2 {input2} "
         f"-db {db} "
         f"-t {threads} "
         f"-o {output_dir} "
