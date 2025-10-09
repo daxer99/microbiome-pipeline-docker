@@ -17,11 +17,7 @@ def run_qc(sample_dir, config):
     os.makedirs(output_dir, exist_ok=True)
 
     # Ruta al directorio de Trimmomatic
-    TRIMMOMATIC_DIR = "/opt/trimmomatic"
-    if not os.path.exists(TRIMMOMATIC_DIR):
-        raise FileNotFoundError(f"No se encuentra Trimmomatic en: {TRIMMOMATIC_DIR}")
-    if not os.path.exists(os.path.join(TRIMMOMATIC_DIR, "trimmomatic-0.40.jar")):
-        raise FileNotFoundError("No se encuentra trimmomatic-0.40.jar")
+    TRIMMOMATIC_JAR = "/opt/trimmomatic/trimmomatic-0.40.jar"
 
     cmd = (
         f"kneaddata "
@@ -29,7 +25,7 @@ def run_qc(sample_dir, config):
         f"-db {db} "
         f"-t {threads} "
         f"-o {output_dir} "
-        f"--trimmomatic {TRIMMOMATIC_DIR} "
+        f"--trimmomatic {TRIMMOMATIC_JAR} "
         f"--run-fastqc-start --run-fastqc-end"
     )
 
