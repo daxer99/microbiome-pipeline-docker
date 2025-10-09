@@ -55,11 +55,11 @@ RUN pip install \
 # --- INSTALAR TRIMMOMATIC MANUALMENTE ---
 ENV TRIMMOMATIC_DIR=/opt/trimmomatic
 RUN mkdir -p $TRIMMOMATIC_DIR && \
-    curl -L -o Trimmomatic-0.40.zip \
+    curl -L -o $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip \
          "https://github.com/usadellab/Trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip" && \
-    unzip Trimmomatic-0.40.zip -d /tmp/trimmomatic-extract && \
-    cp -r /tmp/trimmomatic-extract/* $TRIMMOMATIC_DIR/ && \
-    rm -rf Trimmomatic-0.40.zip /tmp/trimmomatic-extract && \
+    unzip $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip -d $TRIMMOMATIC_DIR && \
+    mv $TRIMMOMATIC_DIR/trimmomatic-0.40.jar $TRIMMOMATIC_DIR/trimmomatic.jar && \
+    rm $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip && \
     echo "✅ Trimmomatic instalado en $TRIMMOMATIC_DIR"
 
 

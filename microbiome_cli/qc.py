@@ -16,10 +16,10 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # Ruta al .jar descargado desde usadellab
-    TRIMMOMATIC_JAR = "/opt/trimmomatic/trimmomatic-0.40.jar"
-    if not os.path.exists(TRIMMOMATIC_JAR):
-        raise FileNotFoundError(f"No se encuentra trimmomatic.jar: {TRIMMOMATIC_JAR}")
+    # Ruta al directorio de Trimmomatic (no al .jar)
+    TRIMMOMATIC_DIR = "/opt/trimmomatic"
+    if not os.path.exists(TRIMMOMATIC_DIR):
+        raise FileNotFoundError(f"No se encuentra el directorio de Trimmomatic: {TRIMMOMATIC_DIR}")
 
     cmd = (
         f"kneaddata "
@@ -27,9 +27,9 @@ def run_qc(sample_dir, config):
         f"-db {db} "
         f"-t {threads} "
         f"-o {output_dir} "
-        f"--trimmomatic {TRIMMOMATIC_JAR} "
+        f"--trimmomatic {TRIMMOMATIC_DIR} "
         f"--run-fastqc-start --run-fastqc-end "
-        f"--bypass-trf"  # ✅ Opción válida para kneaddata 0.12.3
+        f"--bypass-trf"
     )
 
     print(f"🔍 QC: {cmd}")
