@@ -23,13 +23,13 @@ def run_qc(sample_dir, config):
 
     cmd = (
         f"kneaddata "
-        f"--input1 {input1} --input2 {input2} "  # ← Usa --input1 y --input2
+        f"--input1 {input1} --input2 {input2} "
         f"-db {db} "
         f"-t {threads} "
         f"-o {output_dir} "
         f"--trimmomatic {TRIMMOMATIC_JAR} "
         f"--run-fastqc-start --run-fastqc-end "
-        f"--find-tandem-repeats 0"  # Desactiva trf
+        f"--bypass-trf"  # ✅ Opción válida para kneaddata 0.12.3
     )
 
     print(f"🔍 QC: {cmd}")
