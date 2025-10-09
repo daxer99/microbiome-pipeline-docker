@@ -32,7 +32,8 @@ def run_taxonomy(sample_dir, config):
         f"--input_type fastq "
         f"--db_dir {db} "
         f"--nproc {nproc} "
-        f"--offline "  
+        f"--offline "
+        f"-x mpa_vJun23_CHOCOPhlAnSGB_202307 "
         f"--output {profile_path}"
     )
 
@@ -40,13 +41,3 @@ def run_taxonomy(sample_dir, config):
     result = subprocess.run(cmd, shell=True)
     if result.returncode != 0:
         raise RuntimeError(f"Command failed: {cmd}")
-
-    # Generar gráfico opcional
-    plot_path = os.path.join(output_dir, "profile_plot.png")
-    plot_cmd = (
-        f"metaphlan "
-        f"{profile_path} "
-        f"--plot_type bar --width 8 --height 6 --dpi 300 "
-        f"--out_file {plot_path}"
-    )
-    subprocess.run(plot_cmd, shell=True, check=False)
