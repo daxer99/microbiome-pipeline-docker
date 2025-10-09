@@ -1,6 +1,7 @@
 # microbiome_cli/taxonomy.py
 import subprocess
 import os
+import glob
 
 
 def run_taxonomy(sample_dir, config):
@@ -8,20 +9,27 @@ def run_taxonomy(sample_dir, config):
     Ejecuta MetaPhlAn para clasificación taxonómica.
     """
     db = config["paths"]["metaphlan_db"]
-    nproc = config["tools"]["threads"]  # Usa threads desde config
+    nproc = config["tools"]["threads"]
 
-    # Entrada: salida de QC (R1 paired fastq)
+    # Buscar el archivo R1 emparejado limpio (usar glob para expandir *)
     input_pattern = os.path.join(sample_dir, "kneaddata_output", "*_R1_kneaddata_paired*.fastq")
+    input_files = glob.glob(input_pattern)
+
+    if not input_files:
+        raise FileNotFoundError(f"No se encontró ningún archivo que coincida con: {input_pattern}")
+
+    input_file = input_files[0]  # Toma el primer match
+
     output_dir = os.path.join(sample_dir, "taxonomy")
     os.makedirs(output_dir, exist_ok=True)
     profile_path = os.path.join(output_dir, "profile.txt")
 
     cmd = (
         f"metaphlan "
-        f"{input_pattern} "
+        f"{input_file} "                # ← Archivo real, no un patrón
         f"--input_type fastq "
         f"--db {db} "
-        f"--nproc {nproc} "           # ← ¡Cambiado de --threads a --nproc!
+        f"--nproc {nproc} "
         f"--output {profile_path}"
     )
 
