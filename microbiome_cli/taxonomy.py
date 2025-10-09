@@ -19,6 +19,7 @@ def run_taxonomy(sample_dir, config):
     cmd = (
         f"metaphlan "
         f"{input_pattern} "
+        f"--input_type fastq "           # ← ¡Clave!
         f"--db {db} "
         f"--threads {threads} "
         f"--output {profile_path}"
