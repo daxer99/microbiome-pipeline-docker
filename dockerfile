@@ -62,6 +62,12 @@ RUN mkdir -p $TRIMMOMATIC_DIR && \
     rm -rf Trimmomatic-0.40.zip /tmp/trimmomatic-extract && \
     echo "✅ Trimmomatic instalado en $TRIMMOMATIC_DIR"
 
+# --- INSTALAR TRF (Tandem Repeats Finder) ---
+RUN wget -O /tmp/trf409.linux64 https://tandem.bu.edu/trf/downloads/trf409.linux64 && \
+    chmod +x /tmp/trf409.linux64 && \
+    mv /tmp/trf409.linux64 /usr/local/bin/trf && \
+    echo "✅ trf instalado en /usr/local/bin/trf"
+
 # Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
