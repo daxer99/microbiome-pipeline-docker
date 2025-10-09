@@ -8,7 +8,7 @@ def run_taxonomy(sample_dir, config):
     Ejecuta MetaPhlAn para clasificación taxonómica.
     """
     db = config["paths"]["metaphlan_db"]
-    threads = config["tools"]["threads"]
+    nproc = config["tools"]["threads"]  # Usa threads desde config
 
     # Entrada: salida de QC (R1 paired fastq)
     input_pattern = os.path.join(sample_dir, "kneaddata_output", "*_R1_kneaddata_paired*.fastq")
@@ -19,9 +19,9 @@ def run_taxonomy(sample_dir, config):
     cmd = (
         f"metaphlan "
         f"{input_pattern} "
-        f"--input_type fastq "           # ← ¡Clave!
+        f"--input_type fastq "
         f"--db {db} "
-        f"--threads {threads} "
+        f"--nproc {nproc} "           # ← ¡Cambiado de --threads a --nproc!
         f"--output {profile_path}"
     )
 
