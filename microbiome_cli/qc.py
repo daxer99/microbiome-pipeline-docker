@@ -28,7 +28,7 @@ def run_qc(sample_dir, config):
         f"-t {threads} "
         f"-o {output_dir} "
         f"--trimmomatic {TRIMMOMATIC_DIR} "
-        f"--run-fastqc-start --run-fastqc-end "
+        #f"--run-fastqc-start --run-fastqc-end "
         f"--bypass-trf"
     )
 
