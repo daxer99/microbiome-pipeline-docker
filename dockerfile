@@ -51,12 +51,10 @@ RUN pip install \
     pandas \
     pyyaml
 
-# --- INSTALAR TRIMMOMATIC MANUALMENTE ---
+# --- INSTALAR TRIMMOMATIC MANUALMENTE (alternativa) ---
 ENV TRIMMOMATIC_DIR=/opt/trimmomatic
 RUN mkdir -p $TRIMMOMATIC_DIR && \
-    wget -O Trimmomatic-0.40.zip \
-    --user-agent="Mozilla/5.0" \
-    --header="Accept: application/octet-stream" \
+    curl -L -o Trimmomatic-0.40.zip \
     "https://github.com/timflutre/trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip" && \
     unzip Trimmomatic-0.40.zip -d /tmp/trimmomatic-extract && \
     cp -r /tmp/trimmomatic-extract/Trimmomatic-0.40/* $TRIMMOMATIC_DIR/ && \
