@@ -52,16 +52,12 @@ RUN pip install \
     pandas \
     pyyaml
 
-# --- INSTALAR TRIMMOMATIC MANUALMENTE ---
-ENV TRIMMOMATIC_DIR=/opt/trimmomatic
-RUN mkdir -p $TRIMMOMATIC_DIR && \
-    curl -L -o $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip \
-         "https://github.com/timflutre/trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip" && \
-    unzip $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip -d $TRIMMOMATIC_DIR && \
-    mv $TRIMMOMATIC_DIR/Trimmomatic-0.40/* $TRIMMOMATIC_DIR/ && \
-    rmdir $TRIMMOMATIC_DIR/Trimmomatic-0.40 && \
-    rm $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip && \
-    echo "✅ Trimmomatic instalado en $TRIMMOMATIC_DIR"
+# --- INSTALAR TRIMMOMATIC DESDE MIRROR DEBIAN ---
+ENV TRIMMOMATIC_JAR=/opt/trimmomatic/trimmomatic.jar
+RUN mkdir -p /opt/trimmomatic && \
+    curl -L -o $TRIMMOMATIC_JAR \
+         "https://ftp.lyx.org/pub/linux/distributions/debian/pool/main/t/trimmomatic/trimmomatic_0.39-2.jar" && \
+    echo "✅ Trimmomatic descargado en $TRIMMOMATIC_JAR"
 
 # Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
