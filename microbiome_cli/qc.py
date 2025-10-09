@@ -17,7 +17,7 @@ def run_qc(sample_dir, config):
     os.makedirs(output_dir, exist_ok=True)
 
     # Ruta al .jar descargado
-    TRIMMOMATIC_JAR = "/opt/trimmomatic/trimmomatic-0.40.jar"
+    TRIMMOMATIC_JAR = "/opt/trimmomatic"
     if not os.path.exists(TRIMMOMATIC_JAR):
         raise FileNotFoundError(f"No se encuentra trimmomatic.jar: {TRIMMOMATIC_JAR}")
 
