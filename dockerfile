@@ -8,13 +8,13 @@ LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pip
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Etc/UTC
 
-# Instalar herramientas básicas (incluido locales para locale-gen)
+# Instalar herramientas básicas
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         wget \
+        curl \
         openjdk-17-jre \
         ca-certificates \
-        curl \
         locales && \
     rm -rf /var/lib/apt/lists/*
 
@@ -53,12 +53,14 @@ RUN pip install \
 
 # --- INSTALAR TRIMMOMATIC MANUALMENTE ---
 ENV TRIMMOMATIC_DIR=/opt/trimmomatic
-RUN mkdir -p /tmp/trimmomatic-download && \
-    cd /tmp/trimmomatic-download && \
-    wget -O Trimmomatic-0.40.zip https://github.com/timflutre/trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip && \
-    unzip Trimmomatic-0.40.zip && \
-    cp -r Trimmomatic-0.40/* $TRIMMOMATIC_DIR/ && \
-    rm -rf /tmp/trimmomatic-download && \
+RUN mkdir -p $TRIMMOMATIC_DIR && \
+    wget -O Trimmomatic-0.40.zip \
+    --user-agent="Mozilla/5.0" \
+    --header="Accept: application/octet-stream" \
+    "https://github.com/timflutre/trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip" && \
+    unzip Trimmomatic-0.40.zip -d /tmp/trimmomatic-extract && \
+    cp -r /tmp/trimmomatic-extract/Trimmomatic-0.40/* $TRIMMOMATIC_DIR/ && \
+    rm -rf Trimmomatic-0.40.zip /tmp/trimmomatic-extract && \
     echo "✅ Trimmomatic instalado en $TRIMMOMATIC_DIR"
 
 # Copiar código del proyecto
