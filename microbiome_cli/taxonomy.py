@@ -25,12 +25,14 @@ def run_taxonomy(sample_dir, config):
     os.makedirs(output_dir, exist_ok=True)
     profile_path = os.path.join(output_dir, "profile.txt")
 
+    # microbiome_cli/taxonomy.py
     cmd = (
         f"metaphlan "
         f"{input_file} "
         f"--input_type fastq "
         f"--db_dir {db} "
         f"--nproc {nproc} "
+        f"--offline "  
         f"--output {profile_path}"
     )
 
