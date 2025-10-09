@@ -1,7 +1,6 @@
 # microbiome_cli/qc.py
 import subprocess
 import os
-import kneaddata
 
 
 def run_qc(sample_dir, config):
@@ -17,13 +16,10 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    try:
-        KNEDDATA_PATH = os.path.dirname(kneaddata.__file__)
-        TRIMMOMATIC_JAR_DIR = os.path.join(KNEDDATA_PATH, "trimmomatic")
-        if not os.path.exists(TRIMMOMATIC_JAR_DIR):
-            raise FileNotFoundError(f"No se encuentra Trimmomatic: {TRIMMOMATIC_JAR_DIR}")
-    except Exception as e:
-        raise RuntimeError(f"Error al encontrar Trimmomatic: {e}")
+    # Ruta al .jar descargado desde usadellab
+    TRIMMOMATIC_JAR = "/opt/trimmomatic/trimmomatic-0.40.jar"
+    if not os.path.exists(TRIMMOMATIC_JAR):
+        raise FileNotFoundError(f"No se encuentra trimmomatic.jar: {TRIMMOMATIC_JAR}")
 
     cmd = (
         f"kneaddata "
@@ -31,9 +27,9 @@ def run_qc(sample_dir, config):
         f"-db {db} "
         f"-t {threads} "
         f"-o {output_dir} "
-        f"--trimmomatic {TRIMMOMATIC_JAR_DIR} "
+        f"--trimmomatic {TRIMMOMATIC_JAR} "
         f"--run-fastqc-start --run-fastqc-end "
-        f"--find-tandem-repeats 0"  # ← Evita buscar trf
+        f"--find-tandem-repeats 0"  # ← Desactiva completamente trf
     )
 
     print(f"🔍 QC: {cmd}")
