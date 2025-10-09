@@ -29,7 +29,7 @@ def run_taxonomy(sample_dir, config):
         f"metaphlan "
         f"{input_file} "
         f"--input_type fastq "
-        f"--db {db} "
+        f"--bowtie2db {db} "
         f"--nproc {nproc} "
         f"--output {profile_path}"
     )
