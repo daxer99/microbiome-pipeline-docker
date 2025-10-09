@@ -16,8 +16,10 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # Ruta al directorio de Trimmomatic
+    # Ruta al .jar descargado
     TRIMMOMATIC_JAR = "/opt/trimmomatic/trimmomatic-0.40.jar"
+    if not os.path.exists(TRIMMOMATIC_JAR):
+        raise FileNotFoundError(f"No se encuentra trimmomatic.jar: {TRIMMOMATIC_JAR}")
 
     cmd = (
         f"kneaddata "
