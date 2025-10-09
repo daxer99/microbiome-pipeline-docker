@@ -13,6 +13,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         wget \
         curl \
+        unzip \
         openjdk-17-jre \
         ca-certificates \
         locales && \
@@ -51,7 +52,7 @@ RUN pip install \
     pandas \
     pyyaml
 
-# --- INSTALAR TRIMMOMATIC MANUALMENTE (alternativa) ---
+# --- INSTALAR TRIMMOMATIC MANUALMENTE ---
 ENV TRIMMOMATIC_DIR=/opt/trimmomatic
 RUN mkdir -p $TRIMMOMATIC_DIR && \
     curl -L -o Trimmomatic-0.40.zip \
