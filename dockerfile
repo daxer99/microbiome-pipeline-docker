@@ -1,40 +1,26 @@
-# Dockerfile
-FROM biocontainers/kneaddata:v0.12.0_cv1
+FROM quay.io/biocontainers/kneaddata:0.12.0--pyhdfd78af_1
 
 LABEL maintainer="rodrigo.peralta@uner.edu.ar"
-LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pipeline-docker"
 
-# Cambiar a usuario root para instalar más herramientas
 USER root
 
-# Instalar Python 3.10 + pip (ya está en biocontainers, pero aseguramos)
+# Instalar Python y pip si no están presentes
 RUN apt-get update && \
-    apt-get install -y python3.10 python3.10-venv python3-pip && \
+    apt-get install -y python3 python3-pip python3-venv && \
     rm -rf /var/lib/apt/lists/*
 
-# Crear entorno virtual
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
 # Instalar MetaPhlAn y HUMAnN
-RUN pip install metaphlan==4.2.2 humann==3.9 biopython pandas pyyaml
+RUN pip3 install metaphlan==4.2.2 humann==3.9 pyyaml pandas biopython
 
-# Copiar código del proyecto
+# Copiar tu código
 COPY . /home/biodocker/microbiome-pipeline
-
-# Activar entorno virtual por defecto
-ENV PYTHONPATH="/home/biodocker/microbiome-pipeline:$PYTHONPATH"
-
-# Cambiar a usuario biodocker (usuario por defecto en biocontainers)
-USER biodocker
 WORKDIR /home/biodocker/microbiome-pipeline
 
-# Instalar tu paquete
-RUN pip install -e .
+# Instalar tu CLI
+RUN pip3 install -e .
 
-# Volumen para datos
-VOLUME ["/data", "/databases"]
+# Cambiar a usuario biodocker
+USER biodocker
 
-# Entrypoint y comando
-ENTRYPOINT []
-CMD ["python"]
+# Entrypoint
+ENTRYPOINT ["python"]
