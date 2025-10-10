@@ -20,7 +20,4 @@ dependencies = [
 [project.scripts]
 microbiome-cli = "microbiome_cli.cli:main"
 
-# ✅ Importante: evita conflicto con 'configs/'
-[tool.setuptools.packages.find]
-include = ["microbiome_cli*"]
-exclude = ["configs*", "tests*", "docs*"]
+license = "MIT"
