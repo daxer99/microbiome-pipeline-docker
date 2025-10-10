@@ -16,14 +16,14 @@ RUN apt-get update && \
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 
-# Crear usuario
+# Crear usuario no-root
 RUN useradd -m -s /bin/bash microbiome && \
     mkdir -p /home/microbiome/work && \
     chown -R microbiome:microbiome /home/microbiome
 
 WORKDIR /home/microbiome
 
-# Instalar Python
+# Instalar Python 3.10
 RUN apt-get update && \
     apt-get install -y python3.10 python3.10-venv python3.10-dev && \
     ln -sf python3.10 /usr/bin/python && \
@@ -39,7 +39,9 @@ RUN pip install \
     kneaddata==0.12.3 \
     metaphlan==4.2.2 \
     humann==3.9 \
-    biopython pandas pyyaml
+    biopython \
+    pandas \
+    pyyaml
 
 # --- INSTALAR TRIMMOMATIC ---
 ENV TRIMMOMATIC_DIR=/opt/trimmomatic
@@ -50,16 +52,17 @@ RUN mkdir -p $TRIMMOMATIC_DIR && \
     cp -r /tmp/trimmomatic-extract/* $TRIMMOMATIC_DIR/ && \
     rm -rf Trimmomatic-0.40.zip /tmp/trimmomatic-extract
 
-# --- INSTALAR DIAMOND ---
+# --- INSTALAR DIAMOND (para HUMAnN) ---
 RUN wget -O /tmp/diamond-linux64.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.8/diamond-linux64.tar.gz && \
     tar -xzf /tmp/diamond-linux64.tar.gz -C /tmp && \
     mv /tmp/diamond /usr/local/bin/diamond && \
     chmod +x /usr/local/bin/diamond && \
     rm -rf /tmp/diamond-linux64.tar.gz
 
-# ✅ COPIAR EL CÓDIGO ANTES DE INSTALAR EL PAQUETE
+# ✅ COPIAR EL CÓDIGO DESPUÉS DE LAS DEPENDENCIAS
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
+# Cambiar a directorio del proyecto
 WORKDIR /home/microbiome/microbiome-pipeline
 
 # ✅ AHORA SÍ: instalar el paquete con el código presente

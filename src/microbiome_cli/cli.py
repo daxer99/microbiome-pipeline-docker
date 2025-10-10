@@ -4,7 +4,7 @@ import click
 from .qc import run_qc
 from .taxonomy import run_taxonomy
 from .pathways import run_pathways
-from .config_manager import load_config
+from .config import load_config
 
 
 @click.group()
@@ -18,8 +18,17 @@ def cli():
 @click.option("--config", default="config.yaml", help="Ruta al archivo de configuración")
 def run_all(samples_dir, config):
     """Procesa todas las muestras en samples_dir."""
-    config_data = load_config(config)
+    try:
+        config_data = load_config(config)
+    except Exception as e:
+        click.echo(f"❌ Error al cargar config: {e}")
+        return
+
     samples_dir = os.path.abspath(samples_dir)
+
+    if not os.path.exists(samples_dir):
+        click.echo(f"❌ Directorio no encontrado: {samples_dir}")
+        return
 
     samples = [
         os.path.join(samples_dir, d) for d in os.listdir(samples_dir)
@@ -28,7 +37,7 @@ def run_all(samples_dir, config):
     samples.sort()
 
     if not samples:
-        click.echo(f"❌ No se encontraron muestras en {samples_dir}")
+        click.echo(f"❌ No se encontraron subdirectorios en: {samples_dir}")
         return
 
     click.echo(f"🔧 Config cargada desde: {config}")
