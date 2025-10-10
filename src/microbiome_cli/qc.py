@@ -23,7 +23,7 @@ def run_qc(sample_dir, config):
         f"-t {threads} "
         f"-o {output_dir} "
         f"--trimmomatic /opt/trimmomatic "
-        f"--run-fastqc-start --run-fastqc-end "
+        #f"--run-fastqc-start --run-fastqc-end "
         f"--bypass-trf"
     )
     print(f"🔍 QC: {cmd}")
