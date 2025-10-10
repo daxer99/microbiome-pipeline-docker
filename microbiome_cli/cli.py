@@ -4,11 +4,12 @@ import click
 from .qc import run_qc
 from .taxonomy import run_taxonomy
 from .pathways import run_pathways
-from .config_manager import load_config
+from .config import load_config
 
 
 @click.group()
 def cli():
+    """Pipeline de análisis microbioma."""
     pass
 
 
@@ -28,18 +29,29 @@ def run_all(samples_dir, config):
     samples.sort()
 
     if not samples:
-        raise click.ClickException(f"No se encontraron muestras en {samples_dir}")
+        click.echo(f"❌ No se encontraron muestras en {samples_dir}")
+        return
 
-    click.echo(f"🚀 Iniciando pipeline para {len(samples)} muestras...")
+    click.echo(f"🔧 Config cargada desde: {config}")
+    click.echo(f"🚀 Iniciando pipeline para {len(samples)} muestras...\n")
 
     for sample_path in samples:
         sample_name = os.path.basename(sample_path)
-        click.echo(f"\n{'='*60}\n📦 PROCESANDO: {sample_name}\n{'='*60}")
+        click.echo(f"{'='*60}\n📦 PROCESANDO: {sample_name}\n{'='*60}")
 
         try:
             run_qc(sample_path, config_data)
             run_taxonomy(sample_path, config_data)
             run_pathways(sample_path, config_data)
-            click.echo(f"✅ Muestra {sample_name} procesada exitosamente.")
+            click.echo(f"✅ Muestra {sample_name} procesada exitosamente.\n")
         except Exception as e:
-            click.echo(f"❌ ERROR en {sample_name}: {str(e)}")
+            click.echo(f"❌ ERROR en {sample_name}: {str(e)}\n")
+
+
+def main():
+    """Punto de entrada del CLI."""
+    cli()
+
+
+if __name__ == "__main__":
+    main()
