@@ -4,7 +4,7 @@ import click
 from .qc import run_qc
 from .taxonomy import run_taxonomy
 from .pathways import run_pathways
-from .config import load_config
+from .config_manager import load_config
 
 
 @click.group()
