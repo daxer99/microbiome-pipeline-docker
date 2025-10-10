@@ -6,7 +6,7 @@ import os
 def run_pathways(sample_dir, config):
     """
     Ejecuta HUMAnN3 para análisis funcional.
-    Adaptado desde la versión conda para funcionar directamente en Docker.
+    Usa variables de entorno para evitar errores de escritura en config.
     """
     sample_name = os.path.basename(os.path.normpath(sample_dir))
     print(f"🧪 Vías metabólicas: {sample_name}")
@@ -47,13 +47,13 @@ def run_pathways(sample_dir, config):
     merged = os.path.join(sample_dir, f"{sample_name}_merged.fastq")
     humann_out = os.path.join(sample_dir, f"{sample_name}_humann3_results")
 
-    # Configurar bases de datos con humann_config
+    # Configurar bases de datos con variables de entorno
     nucleotide_db = config['paths']['humann_nucleotide_db']
     protein_db = config['paths']['humann_protein_db']
 
-    print("🔧 Configurando rutas de bases de datos para HUMAnN3...")
-    run_cmd(f"humann_config --update database_folders nucleotide {nucleotide_db}")
-    run_cmd(f"humann_config --update database_folders protein {protein_db}")
+    print("🔧 Configurando bases de datos vía variables de entorno...")
+    os.environ["HUMANN_nucleotide_database"] = nucleotide_db
+    os.environ["HUMANN_protein_database"] = protein_db
     print(f"✅ Bases de datos configuradas:\n   Nucleótidos: {nucleotide_db}\n   Proteínas: {protein_db}")
 
     # Combinar R1 y R2
