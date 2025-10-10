@@ -6,7 +6,7 @@ import os
 def run_taxonomy(sample_dir, config):
     """
     Ejecuta MetaPhlAn para clasificación taxonómica usando R1 y R2 emparejados.
-    Funciona en Docker (sin conda).
+    Incluye --mapout requerido por MetaPhlAn 4.x cuando se usan múltiples archivos.
     """
     # Obtener nombre de la muestra desde el directorio
     sample_name = os.path.basename(os.path.normpath(sample_dir))
@@ -42,8 +42,8 @@ def run_taxonomy(sample_dir, config):
 
     # Salidas con prefijo de muestra
     output_file = os.path.join(sample_dir, f"{sample_name}_profile_mpa.txt")
+    temp_mapout = os.path.join(sample_dir, f"{sample_name}_profile_mpa.bz2")  # Necesario para MetaPhlAn
 
-    # Construir comando sin conda
     cmd = (
         f"metaphlan "
         f"{r1},{r2} "
@@ -51,13 +51,17 @@ def run_taxonomy(sample_dir, config):
         f"--db_dir {config['paths']['metaphlan_db']} "
         f"--nproc {config['tools']['threads']} "
         f"-x mpa_vJun23_CHOCOPhlAnSGB_202307 "
-        #f"--t rel_ab_w_read_stats "
-        f"--offline "  
+        f"--t rel_ab_w_read_stats "
+        f"--offline "
+        f"--mapout {temp_mapout} "  # ← ¡Requerido!
         f"-o {output_file}"
     )
 
     print(f"🧬 Ejecutando MetaPhlAn...")
     run_cmd(cmd)
+
+    # Opcional: eliminar el mapout si no lo necesitas
+    run_cmd(f"rm -f {temp_mapout}")
     print(f"✅ Taxonomía completada: {output_file}")
 
     # --- Separar por niveles taxonómicos con prefijo ---
