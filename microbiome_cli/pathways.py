@@ -1,5 +1,5 @@
 # microbiome_cli/pathways.py
-from .utils import run_cmd, find_fastq_pairs
+from .utils import run_cmd
 import os
 
 
