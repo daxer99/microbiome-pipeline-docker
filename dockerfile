@@ -43,6 +43,14 @@ RUN python -m venv /opt/venv
 RUN chown -R microbiome:microbiome /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+# --- INSTALAR DIAMOND (para HUMAnN) ---
+RUN wget -O /tmp/diamond-linux64.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.8/diamond-linux64.tar.gz && \
+    tar -xzf /tmp/diamond-linux64.tar.gz -C /tmp && \
+    mv /tmp/diamond /usr/local/bin/diamond && \
+    chmod +x /usr/local/bin/diamond && \
+    rm -rf /tmp/diamond-linux64.tar.gz && \
+    echo "✅ DIAMOND instalado en /usr/local/bin/diamond"
+
 # Instalar herramientas bioinformáticas desde pip
 RUN pip install \
     kneaddata==0.12.3 \
