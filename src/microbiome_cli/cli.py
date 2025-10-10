@@ -1,10 +1,10 @@
-# microbiome_cli/cli.py
+# src/microbiome_cli/cli.py
 import os
 import click
 from .qc import run_qc
 from .taxonomy import run_taxonomy
 from .pathways import run_pathways
-from .config import load_config
+from .config_manager import load_config
 
 
 @click.group()
@@ -21,7 +21,6 @@ def run_all(samples_dir, config):
     config_data = load_config(config)
     samples_dir = os.path.abspath(samples_dir)
 
-    # Descubrir subdirectorios con muestras
     samples = [
         os.path.join(samples_dir, d) for d in os.listdir(samples_dir)
         if os.path.isdir(os.path.join(samples_dir, d)) and not d.startswith('.')
@@ -49,7 +48,6 @@ def run_all(samples_dir, config):
 
 
 def main():
-    """Punto de entrada del CLI."""
     cli()
 
 

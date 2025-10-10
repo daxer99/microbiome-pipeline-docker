@@ -43,15 +43,7 @@ RUN python -m venv /opt/venv
 RUN chown -R microbiome:microbiome /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# --- INSTALAR DIAMOND (para HUMAnN) ---
-RUN wget -O /tmp/diamond-linux64.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.8/diamond-linux64.tar.gz && \
-    tar -xzf /tmp/diamond-linux64.tar.gz -C /tmp && \
-    mv /tmp/diamond /usr/local/bin/diamond && \
-    chmod +x /usr/local/bin/diamond && \
-    rm -rf /tmp/diamond-linux64.tar.gz && \
-    echo "✅ DIAMOND instalado en /usr/local/bin/diamond"
-
-# Instalar herramientas bioinformáticas desde pip
+# Instalar dependencias
 RUN pip install \
     kneaddata==0.12.3 \
     metaphlan==4.2.2 \
@@ -60,29 +52,35 @@ RUN pip install \
     pandas \
     pyyaml
 
-# --- INSTALAR TRIMMOMATIC MANUALMENTE ---
+# --- INSTALAR TRIMMOMATIC ---
 ENV TRIMMOMATIC_DIR=/opt/trimmomatic
 RUN mkdir -p $TRIMMOMATIC_DIR && \
-    curl -L -o $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip \
+    curl -L -o Trimmomatic-0.40.zip \
          "https://github.com/usadellab/Trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip" && \
-    unzip $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip -d $TRIMMOMATIC_DIR && \
-    mv $TRIMMOMATIC_DIR/trimmomatic-0.40.jar $TRIMMOMATIC_DIR/trimmomatic.jar && \
-    rm $TRIMMOMATIC_DIR/Trimmomatic-0.40.zip && \
+    unzip Trimmomatic-0.40.zip -d /tmp/trimmomatic-extract && \
+    cp -r /tmp/trimmomatic-extract/* $TRIMMOMATIC_DIR/ && \
+    rm -rf Trimmomatic-0.40.zip /tmp/trimmomatic-extract && \
     echo "✅ Trimmomatic instalado en $TRIMMOMATIC_DIR"
 
+# --- INSTALAR DIAMOND (para HUMAnN) ---
+RUN wget -O /tmp/diamond-linux64.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.8/diamond-linux64.tar.gz && \
+    tar -xzf /tmp/diamond-linux64.tar.gz -C /tmp && \
+    mv /tmp/diamond /usr/local/bin/diamond && \
+    chmod +x /usr/local/bin/diamond && \
+    rm -rf /tmp/diamond-linux64.tar.gz && \
+    echo "✅ DIAMOND instalado"
 
-# Copiar código del proyecto
+# Copiar código DEL PROYECTO (después de las dependencias)
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
-# Activar entorno virtual por defecto
-ENV PYTHONPATH="/home/microbiome/microbiome-pipeline:$PYTHONPATH"
+# Cambiar a directorio del proyecto
+WORKDIR /home/microbiome/microbiome-pipeline
+
+# Instalar el paquete en modo desarrollo (ahora SÍ tiene código)
+RUN pip install -e .
 
 # Cambiar a usuario no-root
 USER microbiome
-WORKDIR /home/microbiome/microbiome-pipeline
-
-# Instalar el paquete en modo desarrollo
-RUN pip install -e .
 
 # Volumen para datos
 VOLUME ["/data", "/databases"]
