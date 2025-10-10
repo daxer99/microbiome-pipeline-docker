@@ -4,11 +4,11 @@ paths:
   metaphlan_db: "/databases/metaphlan/mpa_vJun23_CHOCOPhlAnSGB_202307"
   humann_nucleotide_db: "/databases/chocophlan"
   humann_protein_db: "/databases/uniref"
-  humann_go_db: "/databases/utility_mapping/map_go_uniref90.txt.gz"
-  humann_ko_db: "/databases/utility_mapping/map_ko_uniref90.txt.gz"
-  humann_ec_db: "/databases/utility_mapping/map_level4ec_uniref90.txt.gz"
-  humann_pfam_db: "/databases/utility_mapping/map_pfam_uniref90.txt.gz"
-  humann_eggnog_db: "/databases/utility_mapping/map_eggnog_uniref90.txt.gz"
+  humann_go_db: "/databases/utility_mapping/utility_mapping/map_go_uniref90.txt.gz"
+  humann_ko_db: "/databases/utility_mapping/utility_mapping/map_ko_uniref90.txt.gz"
+  humann_ec_db: "/databases/utility_mapping/utility_mapping/map_level4ec_uniref90.txt.gz"
+  humann_pfam_db: "/databases/utility_mapping/utility_mapping/map_pfam_uniref90.txt.gz"
+  humann_eggnog_db: "/databases/utility_mapping/utility_mapping/map_eggnog_uniref90.txt.gz"
 
 tools:
   threads: 8
