@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools >= 61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -16,8 +16,7 @@ dependencies = [
     "pandas",
     "pyyaml"
 ]
+license = "MIT"
 
 [project.scripts]
 microbiome-cli = "microbiome_cli.cli:main"
-
-license = "MIT"
