@@ -1,5 +1,5 @@
 # microbiome_cli/qc.py
-import subprocess
+from .utils import run_cmd, find_fastq_pairs
 import os
 
 
@@ -7,19 +7,19 @@ def run_qc(sample_dir, config):
     db = config["paths"]["kneaddata_db"]
     threads = config["tools"]["threads"]
 
-    input1 = os.path.join(sample_dir, "R1.fastq")
-    input2 = os.path.join(sample_dir, "R2.fastq")
+    # Usar la función centralizada
+    input1, input2 = find_fastq_pairs(sample_dir)
 
-    if not os.path.exists(input1) or not os.path.exists(input2):
-        raise FileNotFoundError(f"No se encontraron los archivos FASTQ en {sample_dir}")
+    print(f"✅ Archivos FASTQ encontrados:")
+    print(f"   R1: {input1}")
+    print(f"   R2: {input2}")
 
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # Ruta al directorio de Trimmomatic (no al .jar)
     TRIMMOMATIC_DIR = "/opt/trimmomatic"
     if not os.path.exists(TRIMMOMATIC_DIR):
-        raise FileNotFoundError(f"No se encuentra el directorio de Trimmomatic: {TRIMMOMATIC_DIR}")
+        raise FileNotFoundError(f"No se encuentra Trimmomatic: {TRIMMOMATIC_DIR}")
 
     cmd = (
         f"kneaddata "
@@ -28,7 +28,7 @@ def run_qc(sample_dir, config):
         f"-t {threads} "
         f"-o {output_dir} "
         f"--trimmomatic {TRIMMOMATIC_DIR} "
-        #f"--run-fastqc-start --run-fastqc-end "
+        f"--run-fastqc-start --run-fastqc-end "
         f"--bypass-trf"
     )
 
