@@ -51,7 +51,7 @@ def run_taxonomy(sample_dir, config):
         f"--db_dir {config['paths']['metaphlan_db']} "
         f"--nproc {config['tools']['threads']} "
         f"-x mpa_vJun23_CHOCOPhlAnSGB_202307 "
-        f"--t rel_ab_w_read_stats "
+        #f"--t rel_ab_w_read_stats "
         f"--offline "
         f"--mapout {temp_mapout} "  # ← ¡Requerido!
         f"-o {output_file}"
