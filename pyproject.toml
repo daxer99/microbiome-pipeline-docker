@@ -1,32 +1,26 @@
 [build-system]
-requires = ["setuptools >= 77.0.3", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "microbiome-pipeline"
+name = "microbiome-cli"
 version = "0.1.0"
-description = "CLI modular para análisis de microbioma: QC, taxonomía y vías metabólicas"
+description = "Pipeline microbioma"
 readme = "README.md"
-license = "MIT"
-authors = [
-    {name = "Rodrigo Peralta", email = "rodrigo.peralta@uner.edu.ar"}
-]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering :: Bio-Informatics",
-    "Development Status :: 4 - Beta",
-]
 requires-python = ">=3.8"
-keywords = ["microbiome", "metagenomics", "pipeline", "cli"]
+dependencies = [
+    "kneaddata==0.12.3",
+    "metaphlan==4.2.2",
+    "humann==3.9",
+    "biopython",
+    "pandas",
+    "pyyaml"
+]
 
 [project.scripts]
 microbiome-cli = "microbiome_cli.cli:main"
 
-[project.urls]
-Homepage = "https://github.com/daxer99/microbiome-pipeline-docker"
-Repository = "https://github.com/daxer99/microbiome-pipeline-docker"
-Issues = "https://github.com/daxer99/microbiome-pipeline-docker/issues"
-
+# ✅ Importante: evita conflicto con 'configs/'
 [tool.setuptools.packages.find]
 include = ["microbiome_cli*"]
+exclude = ["configs*", "tests*", "docs*"]
