@@ -1,11 +1,7 @@
-# utils.py
-import subprocess
+# microbiome_cli/utils.py
+import os
+import glob
 
-def run_cmd(cmd):
-    print(f"🔧 Ejecutando: {cmd}")
-    result = subprocess.run(cmd, shell=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"Command failed: {cmd}")
 
 def find_fastq_pairs(sample_dir):
     """

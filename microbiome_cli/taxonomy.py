@@ -1,6 +1,8 @@
 # microbiome_cli/taxonomy.py
-import os
 from .utils import run_cmd
+import os
+import glob
+
 
 def run_taxonomy(sample_dir, config):
     clean_dir = os.path.join(sample_dir, "kneaddata_output")
