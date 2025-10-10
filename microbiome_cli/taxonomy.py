@@ -53,7 +53,7 @@ def run_taxonomy(sample_dir, config):
         f"-x mpa_vJun23_CHOCOPhlAnSGB_202307 "
         #f"--t rel_ab_w_read_stats "
         f"--offline "
-        f"--mapout {temp_mapout} "  # ← ¡Requerido!
+        f"--mapout {temp_mapout} "
         f"-o {output_file}"
     )
 
