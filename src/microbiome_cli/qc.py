@@ -1,4 +1,4 @@
-# src/microbiome_cli/qc.py
+# microbiome_cli/qc.py
 from .utils import run_cmd, find_fastq_pairs
 import os
 
@@ -16,6 +16,10 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
+    # ✅ Define explícitamente el directorio de Trimmomatic
+    TRIMMOMATIC_DIR = "/opt/trimmomatic"
+
+    # ✅ Usa --trimmomatic-options para forzar más memoria
     cmd = (
         f"kneaddata "
         f"--input1 {input1} --input2 {input2} "
@@ -23,9 +27,10 @@ def run_qc(sample_dir, config):
         f"-t {threads} "
         f"-o {output_dir} "
         f"--trimmomatic {TRIMMOMATIC_DIR} "
-        f"--trimmomatic-options \"-Xmx8g\" "  # ← ¡Clave!
+        f"--trimmomatic-options \"-Xmx8g\" "   # ← Clave: fuerza Java con más RAM
         f"--run-fastqc-start --run-fastqc-end "
         f"--bypass-trf"
     )
+
     print(f"🔍 QC: {cmd}")
     run_cmd(cmd)
