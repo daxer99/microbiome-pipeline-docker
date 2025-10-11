@@ -16,10 +16,9 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # ✅ Define explícitamente el directorio de Trimmomatic
     TRIMMOMATIC_DIR = "/opt/trimmomatic"
 
-    # ✅ Usa --trimmomatic-options para forzar más memoria
+    # ✅ Sin comillas alrededor de -Xmx8g
     cmd = (
         f"kneaddata "
         f"--input1 {input1} --input2 {input2} "
@@ -27,7 +26,7 @@ def run_qc(sample_dir, config):
         f"-t {threads} "
         f"-o {output_dir} "
         f"--trimmomatic {TRIMMOMATIC_DIR} "
-        f"--trimmomatic-options \"-Xmx8g\" "   # ← Clave: fuerza Java con más RAM
+        f"--trimmomatic-options -Xmx12g "  
         f"--run-fastqc-start --run-fastqc-end "
         f"--bypass-trf"
     )
