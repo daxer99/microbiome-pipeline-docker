@@ -14,8 +14,8 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # Usa el directorio del wrapper
-    TRIMMOMATIC_DIR = "/opt/trimmomatic-wrapper"
+    # ✅ Usa el directorio real de Trimmomatic
+    TRIMMOMATIC_DIR = "/opt/trimmomatic"
 
     cmd = [
         "kneaddata",
