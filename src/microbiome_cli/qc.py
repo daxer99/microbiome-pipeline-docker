@@ -1,25 +1,13 @@
 # microbiome_cli/qc.py
-from .utils import run_cmd
+from .utils import run_cmd, find_fastq_pairs
 import os
 import subprocess
-import glob
-
 
 def run_qc(sample_dir, config):
     db = config["paths"]["kneaddata_db"]
     threads = config["tools"]["threads"]
 
-    # Buscar archivos automáticamente
-    r1_files = sorted(glob.glob(os.path.join(sample_dir, "*_R1*.fastq")))
-    r2_files = sorted(glob.glob(os.path.join(sample_dir, "*_R2*.fastq")))
-
-    if not r1_files or not r2_files:
-        raise FileNotFoundError(
-            f"No se encontraron archivos *_R1*.fastq o *_R2*.fastq en {sample_dir}"
-        )
-
-    input1 = r1_files[0]
-    input2 = r2_files[0]
+    input1, input2 = find_fastq_pairs(sample_dir)
 
     print(f"✅ Archivos FASTQ encontrados:")
     print(f"   R1: {input1}")
