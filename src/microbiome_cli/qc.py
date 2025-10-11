@@ -28,9 +28,6 @@ def run_qc(sample_dir, config):
         "-t", str(threads),
         "-o", output_dir,
         "--trimmomatic", TRIMMOMATIC_DIR,
-        "--trimmomatic-options=-Xmx12g",
-        # "--run-fastqc-start",
-        # "--run-fastqc-end",
         "--bypass-trf"
     ]
 
