@@ -1,13 +1,25 @@
 # microbiome_cli/qc.py
-from .utils import run_cmd, find_fastq_pairs
+from .utils import run_cmd
 import os
+import subprocess
+import glob
 
 
 def run_qc(sample_dir, config):
     db = config["paths"]["kneaddata_db"]
     threads = config["tools"]["threads"]
 
-    input1, input2 = find_fastq_pairs(sample_dir)
+    # Buscar archivos automáticamente
+    r1_files = sorted(glob.glob(os.path.join(sample_dir, "*_R1*.fastq")))
+    r2_files = sorted(glob.glob(os.path.join(sample_dir, "*_R2*.fastq")))
+
+    if not r1_files or not r2_files:
+        raise FileNotFoundError(
+            f"No se encontraron archivos *_R1*.fastq o *_R2*.fastq en {sample_dir}"
+        )
+
+    input1 = r1_files[0]
+    input2 = r2_files[0]
 
     print(f"✅ Archivos FASTQ encontrados:")
     print(f"   R1: {input1}")
@@ -18,18 +30,22 @@ def run_qc(sample_dir, config):
 
     TRIMMOMATIC_DIR = "/opt/trimmomatic"
 
-    # ✅ Sin comillas alrededor de -Xmx8g
-    cmd = (
-        f"kneaddata "
-        f"--input1 {input1} --input2 {input2} "
-        f"-db {db} "
-        f"-t {threads} "
-        f"-o {output_dir} "
-        f"--trimmomatic {TRIMMOMATIC_DIR} "
-        f"--trimmomatic-options -Xmx12g "  
-        f"--run-fastqc-start --run-fastqc-end "
-        f"--bypass-trf"
-    )
+    # ✅ Usar lista de argumentos para evitar problemas de parsing
+    cmd = [
+        "kneaddata",
+        "--input1", input1,
+        "--input2", input2,
+        "-db", db,
+        "-t", str(threads),
+        "-o", output_dir,
+        "--trimmomatic", TRIMMOMATIC_DIR,
+        "--trimmomatic-options", "-Xmx12g",  # ← Separado: clave para que funcione
+        "--run-fastqc-start",
+        "--run-fastqc-end",
+        "--bypass-trf"
+    ]
 
-    print(f"🔍 QC: {cmd}")
-    run_cmd(cmd)
+    print(f"🔍 QC: {' '.join(cmd)}")
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        raise RuntimeError(f"Command failed: {' '.join(cmd)}")
