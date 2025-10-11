@@ -9,17 +9,14 @@ def run_qc(sample_dir, config):
     threads = config["tools"]["threads"]
 
     input1, input2 = find_fastq_pairs(sample_dir)
-
-    print(f"✅ Archivos FASTQ encontrados:")
-    print(f"   R1: {input1}")
-    print(f"   R2: {input2}")
+    print(f"✅ Archivos FASTQ encontrados:\n   R1: {input1}\n   R2: {input2}")
 
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    TRIMMOMATIC_DIR = "/opt/trimmomatic"
+    # Usa el directorio del wrapper
+    TRIMMOMATIC_DIR = "/opt/trimmomatic-wrapper"
 
-    # ✅ Usar --trimmomatic-options=-valor para evitar parsing erróneo
     cmd = [
         "kneaddata",
         "--input1", input1,
