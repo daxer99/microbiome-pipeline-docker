@@ -41,28 +41,13 @@ RUN pip install \
     humann==3.9 \
     biopython pandas pyyaml
 
-# --- INSTALAR TRIMMOMATIC ORIGINAL ---
-ENV TRIMMOMATIC_ORIG=/opt/trimmomatic
-RUN mkdir -p $TRIMMOMATIC_ORIG && \
+# --- INSTALAR TRIMMOMATIC ---
+ENV TRIMMOMATIC_DIR=/opt/trimmomatic
+RUN mkdir -p $TRIMMOMATIC_DIR && \
     curl -L -o Trimmomatic-0.40.zip \
          "https://github.com/usadellab/Trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip" && \
-    unzip Trimmomatic-0.40.zip -d /tmp/trimmomatic-extract && \
-    cp -r /tmp/trimmomatic-extract/* $TRIMMOMATIC_ORIG/ && \
-    rm -rf Trimmomatic-0.40.zip /tmp/trimmomatic-extract
-
-# --- CREAR WRAPPER CON MÁS MEMORIA ---
-RUN mkdir -p /opt/trimmomatic-wrapper && \
-    echo '#!/bin/bash' > /opt/trimmomatic-wrapper/trimmomatic-0.40.jar && \
-    echo 'echo "🔧 Forzando Java con -Xmx8g"' >> /opt/trimmomatic-wrapper/trimmomatic-0.40.jar && \
-    echo 'exec java -Xmx8g -jar "$TRIMMOMATIC_ORIG/trimmomatic-0.40.jar" "$@"' >> /opt/trimmomatic-wrapper/trimmomatic-0.40.jar && \
-    chmod +x /opt/trimmomatic-wrapper/trimmomatic-0.40.jar
-
-# Apuntar kneaddata al wrapper
-ENV TRIMMOMATIC_DIR=/opt/trimmomatic-wrapper
-
-# --- ELIMINAR VERSION INTERNA DE KNEADDATA ---
-RUN rm -rf /opt/venv/lib/python*/site-packages/kneaddata/java/Trimmomatic-* && \
-    echo "✅ Eliminado Trimmomatic interno de kneaddata"
+    unzip Trimmomatic-0.40.zip -d $TRIMMOMATIC_DIR && \
+    rm Trimmomatic-0.40.zip
 
 # --- INSTALAR DIAMOND ---
 RUN wget -O /tmp/diamond-linux64.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.8/diamond-linux64.tar.gz && \

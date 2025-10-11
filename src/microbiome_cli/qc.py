@@ -22,8 +22,9 @@ def run_qc(sample_dir, config):
         f"-db {db} "
         f"-t {threads} "
         f"-o {output_dir} "
-        f"--trimmomatic /opt/trimmomatic "
-        #f"--run-fastqc-start --run-fastqc-end "
+        f"--trimmomatic {TRIMMOMATIC_DIR} "
+        f"--trimmomatic-options \"-Xmx8g\" "  # ← ¡Clave!
+        f"--run-fastqc-start --run-fastqc-end "
         f"--bypass-trf"
     )
     print(f"🔍 QC: {cmd}")
