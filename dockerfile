@@ -52,6 +52,11 @@ RUN pip install \
     pandas \
     pyyaml
 
+# --- ELIMINAR TRIMMOMATIC INTERNO DE KNEADDATA ---
+# Esto es clave para evitar el uso de -Xmx500m hardcodeado
+RUN rm -rf /opt/venv/lib/python*/site-packages/kneaddata/java/Trimmomatic-* && \
+    echo "✅ Eliminado Trimmomatic interno empaquetado"
+
 # --- INSTALAR TRIMMOMATIC EXTERNO ---
 ENV TRIMMOMATIC_ORIG=/opt/trimmomatic
 RUN mkdir -p $TRIMMOMATIC_ORIG && \
@@ -60,19 +65,19 @@ RUN mkdir -p $TRIMMOMATIC_ORIG && \
     unzip Trimmomatic-0.40.zip -d $TRIMMOMATIC_ORIG && \
     rm Trimmomatic-0.40.zip
 
-# --- CREAR WRAPPER CON MÁS MEMORIA ---
-RUN mkdir -p /opt/trimmomatic-wrapper && \
-    echo '#!/bin/bash' > /opt/trimmomatic-wrapper/trimmomatic-0.40.jar && \
-    echo 'echo "🔥 Forzando Java con -Xmx12g"' >> /opt/trimmomatic-wrapper/trimmomatic-0.40.jar && \
-    echo 'exec java -Xmx12g -jar "$TRIMMOMATIC_ORIG/trimmomatic-0.40.jar" "$@"' >> /opt/trimmomatic-wrapper/trimmomatic-0.40.jar && \
-    chmod +x /opt/trimmomatic-wrapper/trimmomatic-0.40.jar
+# --- CREAR WRAPPER CON MÁS MEMORIA PARA JAVA ---
+# Interceptamos el comando 'java' para inyectar -Xmx12g
+RUN mkdir -p /opt/bin && \
+    echo '#!/bin/bash' > /opt/bin/java && \
+    echo 'echo "🔥 Forzando Java con -Xmx12g"' >> /opt/bin/java && \
+    echo 'exec /usr/lib/jvm/java-17-openjdk-amd64/bin/java -Xmx12g "$@"' >> /opt/bin/java && \
+    chmod +x /opt/bin/java
 
-# Apuntar kneaddata al wrapper
-ENV TRIMMOMATIC_DIR=/opt/trimmomatic-wrapper
+# Asegurarnos de que nuestro java esté primero en el PATH
+ENV PATH="/opt/bin:$PATH"
 
-# --- ELIMINAR VERSION INTERNA DE KNEADDATA ---
-RUN rm -rf /opt/venv/lib/python*/site-packages/kneaddata/java/Trimmomatic-* && \
-    echo "✅ Eliminado Trimmomatic interno"
+# Directorio oficial de Trimmomatic (contiene el .jar real)
+ENV TRIMMOMATIC_DIR=/opt/trimmomatic
 
 # --- INSTALAR DIAMOND (para HUMAnN) ---
 RUN wget -O /tmp/diamond-linux64.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.8/diamond-linux64.tar.gz && \
