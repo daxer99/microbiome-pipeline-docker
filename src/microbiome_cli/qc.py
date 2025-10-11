@@ -1,7 +1,8 @@
 # microbiome_cli/qc.py
-from .utils import run_cmd, find_fastq_pairs
+from .utils import find_fastq_pairs
 import os
 import subprocess
+
 
 def run_qc(sample_dir, config):
     db = config["paths"]["kneaddata_db"]
@@ -18,7 +19,7 @@ def run_qc(sample_dir, config):
 
     TRIMMOMATIC_DIR = "/opt/trimmomatic"
 
-    # ✅ Usar lista de argumentos para evitar problemas de parsing
+    # ✅ Usar --trimmomatic-options=-valor para evitar parsing erróneo
     cmd = [
         "kneaddata",
         "--input1", input1,
@@ -27,7 +28,7 @@ def run_qc(sample_dir, config):
         "-t", str(threads),
         "-o", output_dir,
         "--trimmomatic", TRIMMOMATIC_DIR,
-        "--trimmomatic-options", "-Xmx12g",  # ← Separado: clave para que funcione
+        "--trimmomatic-options=-Xmx12g",
         "--run-fastqc-start",
         "--run-fastqc-end",
         "--bypass-trf"
