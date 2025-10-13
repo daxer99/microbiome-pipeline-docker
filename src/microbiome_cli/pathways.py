@@ -23,23 +23,23 @@ def run_pathways(sample_dir, config):
 
     merged = os.path.join(sample_dir, f"{sample_name}_merged.fastq")
     humann_out = os.path.join(sample_dir, f"{sample_name}_humann3_results")
-    os.makedirs(humann_out, exist_ok=True)
 
-    # ✅ Configurar bases de datos con variables de entorno
+    # Configurar bases de datos
     print("🔧 Configurando rutas de bases de datos para HUMAnN3...")
-    os.environ["HUMANN_NUCLEOTIDE_DATABASE"] = config["paths"]["humann_nucleotide_db"]
-    os.environ["HUMANN_PROTEIN_DATABASE"] = config["paths"]["humann_protein_db"]
-    os.environ["HUMANN_UTILITY_MAPPING"] = config["paths"]["humann_go_db"]  # Base para regroup
+    nucleotide_db = config['paths']['humann_nucleotide_db']
+    protein_db = config['paths']['humann_protein_db']
 
-    print(f"✅ Bases de datos configuradas:")
-    print(f"   Nucleótidos: {os.environ['HUMANN_NUCLEOTIDE_DATABASE']}")
-    print(f"   Proteínas: {os.environ['HUMANN_PROTEIN_DATABASE']}")
-    print(f"   Utility Mapping: {os.environ['HUMANN_UTILITY_MAPPING']}")
-
-    # Combinar R1 y R2
-    run_cmd(f"cat {r1} {r2} > {merged}")
+    run_cmd(
+        f"humann_config --update database_folders nucleotide {nucleotide_db}"
+    )
+    run_cmd(
+        f"humann_config --update database_folders protein {protein_db}"
+    )
+    print(f"✅ Bases de datos configuradas:\n   Nucleótidos: {nucleotide_db}\n   Proteínas: {protein_db}")
 
     # Ejecutar HUMAnN3
+    run_cmd(f"cat {r1} {r2} > {merged}")
+
     cmd = (
         f"humann "
         f"--input {merged} "
