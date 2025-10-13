@@ -63,7 +63,7 @@ COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
 WORKDIR /home/microbiome/microbiome-pipeline
 
-# ✅ INSTALAR TU PAQUETE EN MODO DESARROLLO
+# ✅ INSTALAR TU PAQUETE EN MODO DESARROLLO (con src/ layout)
 RUN pip install -e .
 
 # ✅ CAMBIAR A USUARIO NO-ROOT

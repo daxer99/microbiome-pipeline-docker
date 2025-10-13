@@ -5,7 +5,7 @@ import os
 
 def run_pathways(sample_dir, config):
     """
-    Ejecuta HUMAnN3 para análisis funcional usando humann_config.
+    Ejecuta HUMAnN3 para análisis funcional.
     """
     sample_name = os.path.basename(os.path.normpath(sample_dir))
     print(f"🧪 Vías metabólicas: {sample_name}")
@@ -27,7 +27,7 @@ def run_pathways(sample_dir, config):
     r2_file = next((f for f in files if "_paired_2.fastq" in f), None)
 
     if not r1_file or not r2_file:
-        raise FileNotFoundError(f"No se encontraron archivos R1/R2 limpios: {files}")
+        raise FileNotFoundError(f"No se encontraron archivos _paired_1/_paired_2: {files}")
 
     r1 = os.path.join(clean_dir, r1_file)
     r2 = os.path.join(clean_dir, r2_file)
@@ -39,23 +39,29 @@ def run_pathways(sample_dir, config):
     merged = os.path.join(sample_dir, f"{sample_name}_merged.fastq")
     humann_out = os.path.join(sample_dir, f"{sample_name}_humann3_results")
 
-    # --- Configurar bases de datos con humann_config ---
+    # ✅ Configurar HUMAnN con permisos correctos
     print("🔧 Configurando rutas de bases de datos para HUMAnN3...")
 
-    nucleotide_db = config['paths']['humann_nucleotide_db']
-    protein_db = config['paths']['humann_protein_db']
+    # Establecer variables de entorno para HUMAnN
+    os.environ["HUMANN_CONFIG_DIR"] = "/home/microbiome/.humann"
+    os.environ["HUMANN_NUCLEOTIDE_DATABASE"] = config["paths"]["humann_nucleotide_db"]
+    os.environ["HUMANN_PROTEIN_DATABASE"] = config["paths"]["humann_protein_db"]
+    os.environ["HUMANN_UTILITY_MAPPING"] = config["paths"]["humann_go_db"]
 
-    # ✅ Usar humann_config para actualizar las rutas
-    run_cmd(f"humann_config --update database_folders nucleotide {nucleotide_db}")
-    run_cmd(f"humann_config --update database_folders protein {protein_db}")
+    # Usar humann_config para actualizar las rutas
+    run_cmd(
+        f"humann_config --update database_folders nucleotide {config['paths']['humann_nucleotide_db']}"
+    )
+    run_cmd(
+        f"humann_config --update database_folders protein {config['paths']['humann_protein_db']}"
+    )
+    print(
+        f"✅ Bases de datos configuradas:\n   Nucleótidos: {config['paths']['humann_nucleotide_db']}\n   Proteínas: {config['paths']['humann_protein_db']}")
 
-    print(f"✅ Bases de datos configuradas:")
-    print(f"   Nucleótidos: {nucleotide_db}")
-    print(f"   Proteínas: {protein_db}")
-
-    # --- Ejecutar HUMAnN3 ---
+    # Combinar R1 y R2
     run_cmd(f"cat {r1} {r2} > {merged}")
 
+    # Ejecutar HUMAnN3
     cmd = (
         f"humann "
         f"--input {merged} "
@@ -83,7 +89,7 @@ def run_pathways(sample_dir, config):
     if not os.path.exists(genefam_path):
         raise FileNotFoundError(f"No se encontró el archivo de genefamilias: {genefam_path}")
 
-    # Renormalizar a abundancia relativa
+    # Renormalizar
     print("🔁 Renormalizando a abundancia relativa...")
     run_cmd(
         f"humann_renorm_table "
@@ -94,7 +100,7 @@ def run_pathways(sample_dir, config):
         f"--input {sample_name}_merged_pathabundance.tsv --units relab --output {sample_name}_merged_pathabundance_relab.tsv"
     )
 
-    # Extraer no estratificado de genefamilias
+    # Extraer no estratificado
     print("✂️ Extrayendo genefamilias no estratificadas...")
     stra_tmp_dir = "stra_tmp"
     run_cmd(
@@ -104,7 +110,7 @@ def run_pathways(sample_dir, config):
     run_cmd(f"mv {stra_tmp_dir}/{sample_name}_merged_genefamilies_relab_unstratified.tsv .")
     run_cmd("rm -r stra_tmp")
 
-    # Función auxiliar para procesar cada base de datos
+    # Función auxiliar para regroup
     def process_regroup(input_tsv, db_path, output_suffix):
         out_tsv = f"{sample_name}_merged_genefamilies_relab_{output_suffix}.tsv"
         stra_dir = f"stra_{output_suffix}"
@@ -128,15 +134,21 @@ def run_pathways(sample_dir, config):
     try:
         print("🔄 Procesando GO...")
         process_regroup(f"{sample_name}_merged_genefamilies_relab.tsv", config['paths']['humann_go_db'], "go")
+
         print("🔄 Procesando KO...")
         process_regroup(f"{sample_name}_merged_genefamilies_relab.tsv", config['paths']['humann_ko_db'], "ko")
+
         print("🔄 Procesando EC...")
         process_regroup(f"{sample_name}_merged_genefamilies_relab.tsv", config['paths']['humann_ec_db'], "ec")
+
         print("🔄 Procesando PFAM...")
         process_regroup(f"{sample_name}_merged_genefamilies_relab.tsv", config['paths']['humann_pfam_db'], "pfam")
+
         print("🔄 Procesando EGGNOG...")
         process_regroup(f"{sample_name}_merged_genefamilies_relab.tsv", config['paths']['humann_eggnog_db'], "eggnog")
+
         print(f"✅ Post-procesamiento HUMAnN3 completado en: {results_dir}")
+
     except Exception as e:
         print(f"❌ Error en post-procesamiento: {e}")
         raise
@@ -145,7 +157,7 @@ def run_pathways(sample_dir, config):
 
 
 def run_cmd(cmd):
-    """Ejecuta un comando shell y muestra salida en tiempo real"""
+    """Ejecuta un comando shell y muestra salida en tiempo real."""
     print(f"🔧 Ejecutando: {cmd}")
     result = subprocess.run(cmd, shell=True)
     if result.returncode != 0:

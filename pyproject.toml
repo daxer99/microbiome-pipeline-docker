@@ -3,21 +3,32 @@ requires = ["setuptools >= 77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "microbiome-cli"
+name = "microbiome-pipeline"
 version = "0.1.0"
-description = "Pipeline microbioma"
+description = "CLI modular para análisis de microbioma: QC, taxonomía y vías metabólicas"
 readme = "README.md"
-requires-python = ">=3.8"
-dependencies = [
-    "kneaddata==0.12.3",
-    "metaphlan==4.2.2",
-    "humann==3.9",
-    "biopython",
-    "pandas",
-    "pyyaml"
-]
-
 license = "MIT"
+authors = [
+    {name = "Rodrigo Peralta", email = "rodrigo.peralta@uner.edu.ar"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Development Status :: 4 - Beta",
+]
+requires-python = ">=3.8"
+keywords = ["microbiome", "metagenomics", "pipeline", "cli"]
 
 [project.scripts]
 microbiome-cli = "microbiome_cli.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/daxer99/microbiome-pipeline-docker"
+Repository = "https://github.com/daxer99/microbiome-pipeline-docker"
+Issues = "https://github.com/daxer99/microbiome-pipeline-docker/issues"
+
+# ✅ Soluciona el error de múltiples paquetes
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["microbiome_cli*"]
