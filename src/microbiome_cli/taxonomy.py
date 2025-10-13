@@ -39,7 +39,8 @@ def run_taxonomy(sample_dir, config):
     run_cmd(f"rm -f /tmp/{sample_name}_temp.bz2")
     print(f"✅ Taxonomía completada: {mpa_profile}")
 
-    # --- Post-procesamiento (igual que antes) ---
+    # --- Post-procesamiento ---
+
     try:
         profile_path = mpa_profile
 
@@ -51,7 +52,24 @@ def run_taxonomy(sample_dir, config):
             f"grep -E 'c__|clade' {profile_path} | egrep -v 'o__|f__|g__|s__' | "
             f"sed 's/^.*c__//g' | cut -f1,2-5000 > {os.path.join(sample_dir, f'{sample_name}_profile_class.txt')}"
         )
-        # ... (el resto igual)
+        run_cmd(
+            f"grep -E 'o__|clade' {profile_path} | egrep -v 'f__|g__|s__' | "
+            f"sed 's/^.*o__//g' | cut -f1,2-5000 > {os.path.join(sample_dir, f'{sample_name}_profile_order.txt')}"
+        )
+        run_cmd(
+            f"grep -E 'f__|clade' {profile_path} | egrep -v 'g__|s__' | "
+            f"sed 's/^.*f__//g' | cut -f1,2-5000 > {os.path.join(sample_dir, f'{sample_name}_profile_family.txt')}"
+        )
+        run_cmd(
+            f"grep -E 'g__|clade' {profile_path} | egrep -v 's__' | "
+            f"sed 's/^.*g__//g' | cut -f1,2-5000 > {os.path.join(sample_dir, f'{sample_name}_profile_genus.txt')}"
+        )
+        run_cmd(
+            f"grep -E 's__|clade' {profile_path} | "
+            f"sed 's/^.*s__//g' | cut -f1,2-50000 > {os.path.join(sample_dir, f'{sample_name}_profile_species.txt')}"
+        )
+        print(f"✅ Perfiles taxonómicos con prefijo guardados en {sample_dir}")
+
     except Exception as e:
         print(f"❌ Error al procesar niveles taxonómicos: {e}")
         raise

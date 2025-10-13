@@ -24,12 +24,20 @@ def run_pathways(sample_dir, config):
     merged = os.path.join(sample_dir, f"{sample_name}_merged.fastq")
     humann_out = os.path.join(sample_dir, f"{sample_name}_humann3_results")
 
-    # Configurar bases de datos vía variables de entorno
+
+    # Configurar bases de datos
+    print("🔧 Configurando rutas de bases de datos para HUMAnN3...")
     nucleotide_db = config['paths']['humann_nucleotide_db']
     protein_db = config['paths']['humann_protein_db']
 
-    os.environ["HUMANN_nucleotide_database"] = nucleotide_db
-    os.environ["HUMANN_protein_database"] = protein_db
+    run_cmd(
+        f"humann_config --update database_folders nucleotide {nucleotide_db}"
+    )
+    run_cmd(
+        f"humann_config --update database_folders protein {protein_db}"
+    )
+    print(f"✅ Bases de datos configuradas:\n   Nucleótidos: {nucleotide_db}\n   Proteínas: {protein_db}")
+
 
     run_cmd(f"cat {r1} {r2} > {merged}")
 
@@ -47,6 +55,3 @@ def run_pathways(sample_dir, config):
     print(f"🧫 Ejecutando HUMAnN3...")
     run_cmd(cmd)
     print(f"✅ Análisis funcional completado: {humann_out}")
-
-    # --- Post-procesamiento (igual que antes) ---
-    # (mantén el regroup, renormalización, etc.)
