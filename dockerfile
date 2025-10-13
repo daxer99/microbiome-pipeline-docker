@@ -1,103 +1,98 @@
+# Dockerfile
 FROM ubuntu:22.04
 
-# Evitar preguntas interactivas durante la instalación
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=UTC
+LABEL maintainer="rodrigo.peralta@uner.edu.ar"
+LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pipeline-docker"
 
+ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
+
+# Instalar herramientas básicas (ahora incluye 'unzip')
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    curl \
-    wget \
-    git \
-    build-essential \
-    software-properties-common \
-    locales \
-    && rm -rf /var/lib/apt/lists/*
+        wget \
+        curl \
+        unzip \                 # <-- ¡Clave!
+        openjdk-17-jre \
+        ca-certificates \
+        locales && \
+    rm -rf /var/lib/apt/lists/*
 
-# Configurar locale
+# Configurar UTF-8
 RUN locale-gen en_US.UTF-8
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 
-# Crear usuario microbiome
+# Crear usuario no-root
 RUN useradd -m -s /bin/bash microbiome && \
-    mkdir -p /home/microbiome/microbiome-pipeline && \
+    mkdir -p /home/microbiome/work && \
     chown -R microbiome:microbiome /home/microbiome
 
 WORKDIR /home/microbiome
 
-# Instalar Python 3.10 y herramientas básicas
+# Instalar Python 3.10
 RUN apt-get update && \
-    apt-get install -y python3.10 python3.10-venv python3-pip openjdk-17-jre-headless && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y python3.10 python3.10-venv python3.10-dev && \
+    ln -sf python3.10 /usr/bin/python && \
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python
 
-# Crear entorno virtual
-RUN python3 -m venv /opt/venv
+# Entorno virtual
+RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+RUN chown -R microbiome:microbiome /opt/venv
 
-# Instalar paquetes Python
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir \
+# Instalar dependencias principales
+RUN pip install \
     kneaddata==0.12.3 \
     metaphlan==4.2.2 \
-    humann==3.7 \
-    biom-format==2.1.16 \
-    numpy==1.24.3 \
-    pandas==2.0.3 \
-    click==8.1.7 \
-    pyyaml==6.0
+    humann==3.9 \
+    biopython \
+    pandas \
+    pyyaml
 
-# PARCHEAR KNEADDATA - Reemplazar -Xmx500m con -Xmx8G
-RUN find /opt/venv/lib/python3.10/site-packages/kneaddata -name "*.py" -type f -exec sed -i 's/-Xmx500m/-Xmx8G/g' {} \; && \
-    find /opt/venv/lib/python3.10/site-packages/kneaddata -name "*.py" -type f -exec sed -i 's/"-Xmx500m"/"-Xmx8G"/g' {} \;
+# --- ELIMINAR VERSION INTERNA DE KNEADDATA ---
+RUN rm -rf /opt/venv/lib/python*/site-packages/kneaddata/java/Trimmomatic-* && \
+    echo "✅ Eliminado Trimmomatic interno empaquetado"
 
-# Limpiar archivos innecesarios de kneaddata para reducir tamaño
-RUN rm -rf /opt/venv/lib/python*/site-packages/kneaddata/java
+# --- INSTALAR TRIMMOMATIC DESDE GITHUB ---
+ENV TRIMMOMATIC_DIR=/opt/trimmomatic
+RUN mkdir -p $TRIMMOMATIC_DIR && \
+    curl -L -o Trimmomatic-0.40.zip \
+         "https://github.com/usadellab/Trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip" && \
+    unzip Trimmomatic-0.40.zip -d $TRIMMOMATIC_DIR && \
+    rm Trimmomatic-0.40.zip && \
+    echo "✅ Trimmomatic instalado en $TRIMMOMATIC_DIR"
 
-# Instalar Trimmomatic
-RUN mkdir -p /opt/trimmomatic && \
-    curl -L -o Trimmomatic-0.40.zip "http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.40.zip" && \
-    unzip Trimmomatic-0.40.zip -d /opt/trimmomatic && \
-    rm Trimmomatic-0.40.zip
-
-# Crear un wrapper mejorado para Java que sea más robusto
+# --- CREAR WRAPPER PARA JAVA CON MÁS MEMORIA ---
 RUN mkdir -p /opt/bin && \
     echo '#!/bin/bash' > /opt/bin/java && \
-    echo '# Wrapper para forzar memoria Java' >> /opt/bin/java && \
-    echo 'for arg in "$@"; do' >> /opt/bin/java && \
-    echo '  if [[ "$arg" == "-Xmx"* ]]; then' >> /opt/bin/java && \
-    echo '    echo "⚠️  Sobrescribiendo opción de memoria: $arg con -Xmx8G"' >> /opt/bin/java && \
-    echo '    continue' >> /opt/bin/java && \
-    echo '  fi' >> /opt/bin/java && \
-    echo '  NEW_ARGS+=("$arg")' >> /opt/bin/java && \
-    echo 'done' >> /opt/bin/java && \
-    echo 'echo "🔥 Ejecutando Java con -Xmx8G"' >> /opt/bin/java && \
-    echo 'exec /usr/lib/jvm/java-17-openjdk-amd64/bin/java -Xmx8G "${NEW_ARGS[@]}"' >> /opt/bin/java && \
+    echo 'echo "WRAPPER: Ejecutando Java con -Xmx8g"' >> /opt/bin/java && \
+    echo 'exec /usr/lib/jvm/java-17-openjdk-amd64/bin/java -Xmx8g "$@"' >> /opt/bin/java && \
     chmod +x /opt/bin/java
 
-# Asegurarse de que nuestro wrapper tenga prioridad
+# Prioridad al wrapper de java
 ENV PATH="/opt/bin:$PATH"
 
-# Instalar DIAMOND para alignment rápido
+# --- INSTALAR DIAMOND ---
 RUN wget -O /tmp/diamond-linux64.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.8/diamond-linux64.tar.gz && \
-    tar xzf /tmp/diamond-linux64.tar.gz -C /usr/local/bin && \
-    rm /tmp/diamond-linux64.tar.gz
+    tar -xzf /tmp/diamond-linux64.tar.gz -C /tmp && \
+    mv /tmp/diamond /usr/local/bin/diamond && \
+    chmod +x /usr/local/bin/diamond && \
+    rm -rf /tmp/diamond-linux64.tar.gz
 
-# Copiar código del pipeline
+# Copiar código del proyecto
 COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
+# Cambiar al directorio del proyecto
 WORKDIR /home/microbiome/microbiome-pipeline
 
-# Instalar el pipeline en modo desarrollo
+# Instalar el paquete en modo desarrollo
 RUN pip install -e .
 
-# Cambiar a usuario microbiome
+# Cambiar a usuario no-root
 USER microbiome
 
-# Configurar variables de entorno para el usuario
-ENV PATH="/opt/venv/bin:$PATH"
-ENV JAVA_TOOL_OPTIONS="-Xmx8G"
+# Volumen para datos y bases de datos
+VOLUME ["/data", "/databases"]
 
-CMD ["microbiome-cli", "--help"]
+# Entrypoint por defecto
+ENTRYPOINT []
+CMD ["python"]
