@@ -6,7 +6,9 @@ import subprocess
 
 def run_qc(sample_dir, config):
     db = config["paths"]["kneaddata_db"]
-    threads = config["tools"]["threads"]
+
+    # Usar qc.threads en lugar de tools.threads
+    threads = config["qc"]["threads"]
 
     input1, input2 = find_fastq_pairs(sample_dir)
 
@@ -17,7 +19,10 @@ def run_qc(sample_dir, config):
     output_dir = os.path.join(sample_dir, "kneaddata_output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # Usa el directorio real de Trimmomatic
+    # Directorio real de Trimmomatic
+    TRIMMOMATIC_DIR = "/opt/trimmomatic"
+
+    # ✅ Comando con menos threads + más memoria
     cmd = [
         "kneaddata",
         "--input1", input1,
@@ -25,8 +30,10 @@ def run_qc(sample_dir, config):
         "-db", db,
         "-t", str(threads),
         "-o", output_dir,
-        "--trimmomatic", "/opt/trimmomatic",
-        "--bypass-trf"
+        "--trimmomatic", TRIMMOMATIC_DIR,
+        "--bypass-trf",
+        # "--run-fastqc-start",
+        # "--run-fastqc-end"
     ]
 
     print(f"🔍 QC: {' '.join(cmd)}")
