@@ -11,7 +11,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         wget \
         curl \
-        unzip \                 # <-- ¡Clave!
+        unzip \
         openjdk-17-jre \
         ca-certificates \
         locales && \
