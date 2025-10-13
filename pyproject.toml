@@ -1,3 +1,4 @@
+# pyproject.toml
 [build-system]
 requires = ["setuptools >= 77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -7,7 +8,7 @@ name = "microbiome-pipeline"
 version = "0.1.0"
 description = "CLI modular para análisis de microbioma: QC, taxonomía y vías metabólicas"
 readme = "README.md"
-license = "MIT"
+license = "MIT"  # ✅ Formato SPDX (PEP 639)
 authors = [
     {name = "Rodrigo Peralta", email = "rodrigo.peralta@uner.edu.ar"}
 ]
