@@ -17,7 +17,8 @@ def find_fastq_pairs(sample_dir):
     patterns = [
         ("*_R1*.fastq", "*_R2*.fastq"),
         ("*R1*.fastq", "*R2*.fastq"),
-        ("*_1*.fastq", "*_2*.fastq")
+        ("*_1*.fastq", "*_2*.fastq"),
+        ("*1*.fastq", "*2*.fastq")
     ]
     for r1_pat, r2_pat in patterns:
         r1_files = sorted(glob.glob(os.path.join(sample_dir, r1_pat)))

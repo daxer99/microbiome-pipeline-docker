@@ -56,11 +56,11 @@ RUN mkdir -p $TRIMMOMATIC_DIR && \
 # --- CREAR WRAPPER PARA JAVA CON MÁS MEMORIA ---
 RUN mkdir -p /opt/bin && \
     echo '#!/bin/bash' > /opt/bin/java && \
-    echo 'echo "🔥 Forzando Java con -Xmx12g"' >> /opt/bin/java && \
+    echo 'echo "WRAPPER: Ejecutando Java con -Xmx12g"' >> /opt/bin/java && \
     echo 'exec /usr/lib/jvm/java-17-openjdk-amd64/bin/java -Xmx12g "$@"' >> /opt/bin/java && \
     chmod +x /opt/bin/java
 
-# Asegurarnos de que nuestro java se use primero
+# Asegurarnos de que nuestro java esté primero
 ENV PATH="/opt/bin:$PATH"
 
 # --- INSTALAR DIAMOND ---
