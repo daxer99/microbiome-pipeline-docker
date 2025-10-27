@@ -59,8 +59,8 @@ def run_pathways(sample_dir, config):
         f"--threads {config['tools']['threads']} "
         f"--taxonomic-profile {mpa_profile} "
         f"--remove-temp-output "
-        f"--nucleotide-database {config['paths']['humann_nucleotide_db']}"
-        f"--protein-database {config['paths']['humann_protein_db']}"
+        f"--nucleotide-database {config['paths']['humann_nucleotide_db']} "
+        f"--protein-database {config['paths']['humann_protein_db']} "
         f"--remove-column-description-output "
         f"--bypass-nucleotide-search"
     )
