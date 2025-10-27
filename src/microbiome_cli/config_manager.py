@@ -2,7 +2,6 @@
 import yaml
 from pathlib import Path
 
-
 def load_config(config_file="config.yaml"):
     """
     Carga el config.yaml desde una ubicación fija dentro del contenedor.

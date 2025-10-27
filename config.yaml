@@ -13,7 +13,7 @@ paths:
 tools:
   threads: 8
 
-# Configuración específica para QC (kneaddata/Trimmomatic)
+# QC (kneaddata/Trimmomatic)
 qc:
   threads: 4  # Reducido para ahorrar RAM
 

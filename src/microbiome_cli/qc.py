@@ -2,8 +2,6 @@
 from .utils import find_fastq_pairs
 import os
 import subprocess
-
-
 def run_qc(sample_dir, config):
     db = config["paths"]["kneaddata_db"]
 

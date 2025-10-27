@@ -2,7 +2,6 @@
 import subprocess
 import os
 
-
 def run_pathways(sample_dir, config):
     """
     Ejecuta HUMAnN3 para análisis funcional.

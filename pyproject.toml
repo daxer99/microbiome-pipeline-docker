@@ -8,7 +8,7 @@ name = "microbiome-pipeline"
 version = "0.1.0"
 description = "CLI modular para análisis de microbioma: QC, taxonomía y vías metabólicas"
 readme = "README.md"
-license = "MIT"  # ✅ Formato SPDX (PEP 639)
+license = "MIT"
 authors = [
     {name = "Rodrigo Peralta", email = "rodrigo.peralta@uner.edu.ar"}
 ]

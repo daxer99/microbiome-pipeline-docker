@@ -3,7 +3,6 @@ import subprocess
 import os
 import glob
 
-
 def run_cmd(cmd):
     """Ejecuta un comando shell."""
     print(f"🔧 Ejecutando: {cmd}")
