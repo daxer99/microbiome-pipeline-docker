@@ -48,16 +48,6 @@ def run_pathways(sample_dir, config):
     os.environ["HUMANN_PROTEIN_DATABASE"] = config["paths"]["humann_protein_db"]
     os.environ["HUMANN_UTILITY_MAPPING"] = config["paths"]["humann_go_db"]
 
-    # Usar humann_config para actualizar las rutas
-    run_cmd(
-        f"humann_config --update database_folders nucleotide {config['paths']['humann_nucleotide_db']}"
-    )
-    run_cmd(
-        f"humann_config --update database_folders protein {config['paths']['humann_protein_db']}"
-    )
-    print(
-        f"✅ Bases de datos configuradas:\n   Nucleótidos: {config['paths']['humann_nucleotide_db']}\n   Proteínas: {config['paths']['humann_protein_db']}")
-
     # Combinar R1 y R2
     run_cmd(f"cat {r1} {r2} > {merged}")
 
@@ -69,6 +59,8 @@ def run_pathways(sample_dir, config):
         f"--threads {config['tools']['threads']} "
         f"--taxonomic-profile {mpa_profile} "
         f"--remove-temp-output "
+        f"--nucleotide-database {config['paths']['humann_nucleotide_db']}"
+        f"--protein-database {config['paths']['humann_protein_db']}"
         f"--remove-column-description-output "
         f"--bypass-nucleotide-search"
     )
