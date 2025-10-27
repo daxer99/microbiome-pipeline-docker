@@ -1,79 +1,77 @@
-FROM mambaorg/micromamba:1.5.1
+# Dockerfile
+FROM ubuntu:22.04
 
-USER root
+LABEL maintainer="rodrigo.peralta@uner.edu.ar"
+LABEL org.opencontainers.image.source="https://github.com/daxer99/microbiome-pipeline-docker"
 
-# Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
-    wget \
-    curl \
-    git \
-    gcc \
-    g++ \
-    make \
-    openjdk-17-jdk \
-    gzip \
-    bzip2 \
-    zip \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
+
+# Instalar herramientas básicas
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        wget curl unzip openjdk-17-jre ca-certificates locales && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configurar UTF-8
+RUN locale-gen en_US.UTF-8
+ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 
 # Crear usuario no-root
-RUN useradd -m -u 1000 -s /bin/bash microbiome && \
-    mkdir -p /home/microbiome && \
+RUN useradd -m -s /bin/bash microbiome && \
+    mkdir -p /home/microbiome/work && \
     chown -R microbiome:microbiome /home/microbiome
 
-# Crear directorios para bases de datos y darles permisos amplios
-RUN mkdir -p /databases /data && \
-    chmod -R 777 /databases /data
-
-USER microbiome
 WORKDIR /home/microbiome
 
-# Configurar micromamba
-ENV MAMBA_USER=microbiome
-ENV MAMBA_ROOT_PREFIX=/opt/conda
-ENV PATH=/opt/conda/bin:$PATH
+# Instalar Python 3.10
+RUN apt-get update && \
+    apt-get install -y python3.10 python3.10-venv python3.10-dev && \
+    ln -sf python3.10 /usr/bin/python && \
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python
 
-# Crear environment de conda con todas las herramientas
-RUN micromamba create -n pipeline -c conda-forge -c bioconda -c defaults -y \
-    python=3.9 \
-    kneaddata=0.12.0 \
-    metaphlan=4.1.1 \
-    humann=3.9 \
-    bowtie2=2.5.1 \
-    trimmomatic=0.39 \
-    trf=4.09.1 \
-    samtools=1.18 \
-    click=8.1.7 \
-    pyyaml=6.0 \
-    pandas=2.1.3 \
-    biopython=1.81 \
-    && micromamba clean -a -y
+# Crear entorno virtual
+RUN python -m venv /opt/venv
+# ✅ DAR PERMISOS AL USUARIO SOBRE EL ENTORNO VIRTUAL
+RUN chown -R microbiome:microbiome /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Activar el environment
-ENV PATH=/opt/conda/envs/pipeline/bin:$PATH
-ENV CONDA_DEFAULT_ENV=pipeline
-SHELL ["/bin/bash", "-c"]
+# Instalar herramientas bioinformáticas desde pip
+RUN pip install \
+    kneaddata==0.12.3 \
+    metaphlan==4.2.2 \
+    humann==3.9 \
+    biopython pandas pyyaml
 
-# Copiar código del proyecto
-COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline/
+# --- INSTALAR TRIMMOMATIC ---
+ENV TRIMMOMATIC_DIR=/opt/trimmomatic
+RUN mkdir -p $TRIMMOMATIC_DIR && \
+    curl -L -o Trimmomatic-0.40.zip \
+         "https://github.com/usadellab/Trimmomatic/releases/download/v0.40/Trimmomatic-0.40.zip" && \
+    unzip Trimmomatic-0.40.zip -d /tmp/trimmomatic-extract && \
+    cp -r /tmp/trimmomatic-extract/* $TRIMMOMATIC_DIR/ && \
+    rm -rf Trimmomatic-0.40.zip /tmp/trimmomatic-extract
 
-# Instalar el paquete
-RUN cd /home/microbiome/microbiome-pipeline && \
-    /opt/conda/envs/pipeline/bin/pip install -e .
+# --- INSTALAR DIAMOND ---
+RUN wget -O /tmp/diamond-linux64.tar.gz https://github.com/bbuchfink/diamond/releases/download/v2.1.8/diamond-linux64.tar.gz && \
+    tar -xzf /tmp/diamond-linux64.tar.gz -C /tmp && \
+    mv /tmp/diamond /usr/local/bin/diamond && \
+    chmod +x /usr/local/bin/diamond && \
+    rm -rf /tmp/diamond-linux64.tar.gz
 
-# Variables de entorno para HUMAnN3
-# Estas variables permiten que HUMAnN encuentre las bases de datos sin necesidad de configurar archivos
-ENV HUMANN_NUCLEOTIDE_DATABASE=/databases/chocophlan
-ENV HUMANN_PROTEIN_DATABASE=/databases/uniref
+# ✅ COPIAR CÓDIGO DESPUÉS DE INSTALAR HERRAMIENTAS
+COPY --chown=microbiome:microbiome . /home/microbiome/microbiome-pipeline
 
-# Configuración de directorios de trabajo
 WORKDIR /home/microbiome/microbiome-pipeline
 
-# El contenedor puede correr con cualquier usuario gracias a los permisos 777
-# No necesitamos cambiar permisos de archivos de configuración de HUMAnN
-# porque pasaremos las rutas directamente como parámetros
+# ✅ INSTALAR TU PAQUETE EN MODO DESARROLLO (con src/ layout)
+RUN pip install -e .
 
-# Punto de entrada
-ENTRYPOINT ["/opt/conda/envs/pipeline/bin/python", "-m", "microbiome_pipeline.cli"]
-CMD ["--help"]
+# ✅ CAMBIAR A USUARIO NO-ROOT
+USER microbiome
+
+# Volúmenes para datos y bases de datos
+VOLUME ["/data", "/databases"]
+
+# Entrypoint y comando
+ENTRYPOINT []
+CMD ["python"]
